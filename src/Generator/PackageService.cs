@@ -1,7 +1,9 @@
 ﻿using Hy.Modeller.Interfaces;
 using Modeller;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace Hy.Modeller.Generator
 {
@@ -9,17 +11,14 @@ namespace Hy.Modeller.Generator
     {
         private readonly IPackageFileLoader _loader;
         private string _target;
-        private IDictionary<string, IEnumerable<Package>> _items = new Dictionary<string, IEnumerable<Package>>();
-
-        public PackageService()
-        {
-            Target = string.Empty;
-            _loader = new PackageFileLoader();
-        }
+        private readonly IDictionary<string, IEnumerable<Package>> _items = new Dictionary<string, IEnumerable<Package>>();
+        private string _folder;
+        private string _defaultFolder;
 
         public PackageService(IPackageFileLoader loader)
         {
-            _loader = loader ?? throw new System.ArgumentNullException(nameof(loader));
+            _loader = loader ?? throw new ArgumentNullException(nameof(loader));
+            _defaultFolder = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().Location).LocalPath);
         }
 
         public string Target
@@ -28,12 +27,16 @@ namespace Hy.Modeller.Generator
             set => _target = value;
         }
 
-        public string Folder { get; set; } = Directory.GetCurrentDirectory();
+        public string Folder
+        {
+            get => string.IsNullOrWhiteSpace(_folder)  ? _defaultFolder : _folder;
+            set => _folder = value;
+        }
 
         public void Refresh()
         {
             var d = new DirectoryInfo(Folder);
-            if (!d.Exists && string.IsNullOrWhiteSpace(Target)) return;
+            if (!d.Exists) return;
 
             var path = Path.Combine(d.FullName, Target + ".json");
             if (_loader.TryLoad(path, out var packages))

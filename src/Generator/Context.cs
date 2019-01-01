@@ -106,7 +106,7 @@ namespace Hy.Modeller.Generator
             Settings = settings;
             if (Settings != null && !Settings.PackagesInitialised())
             {
-                var ps = new PackageService();
+                var ps = new PackageService(new PackageFileLoader());
                 Settings.RegisterPackages(ps.Items);
             }
         }

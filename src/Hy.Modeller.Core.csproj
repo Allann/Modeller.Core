@@ -10,7 +10,7 @@
     <RepositoryType></RepositoryType>
     <PackageTags>Code Generator, C#</PackageTags>
     <NeutralLanguage>en-AU</NeutralLanguage>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>modeller.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
@@ -25,12 +25,17 @@
 
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.5.16" />
-    <PackageReference Include="Hy.Modeller.Base" Version="1.1.2" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="0.2.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Hy.Modeller.Base">
+      <HintPath>..\..\Modeller.Base.git\src\bin\Debug\netstandard2.0\Hy.Modeller.Base.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
