@@ -1,22 +1,23 @@
-﻿using Hy.Modeller.Generator;
-using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Interfaces;
 using System;
 
 namespace Hy.Modeller.Outputs
 {
     public class Creator
     {
+        private readonly IFileWriter _fileWriter;
+        private readonly IFileCreator _creator;
         private readonly Action<string> _output;
-        private readonly bool _verbose;
 
-        public Creator(Context context, Action<string> output = null, bool verbose = false)
+        public Creator(IContext context, IFileWriter fileWriter, IFileCreator creator, Action<string> output = null)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
+            _creator = creator ?? throw new ArgumentNullException(nameof(creator));
             _output = output;
-            _verbose = verbose;
         }
 
-        public Context Context { get; }
+        public IContext Context { get; }
 
         public void Create(IOutput output)
         {
@@ -27,47 +28,9 @@ namespace Hy.Modeller.Outputs
             if (string.IsNullOrWhiteSpace(outputPath))
                 outputPath = Defaults.OutputFolder;
 
-            _output?.Invoke("Generation finished, writing output.");
-            _output?.Invoke($"Output: {outputPath}");
-
-            if (output is ISnippet x)
-            {
-                var snippet = new CreateSnippet(x, _output);
-                snippet.Create(outputPath);
-            }
-            else if (output is IFile f)
-            {
-                var file = new CreateFile(f, _output);
-                file.Create(outputPath);
-            }
-            else if (output is IFileGroup fg)
-            {
-                var fileGroup = new CreateFileGroup(fg, _output);
-                fileGroup.Create(outputPath);
-            }
-            else if (output is IProject p)
-            {
-                var project = new CreateProject(p, _output);
-                project.Create(outputPath);
-            }
-            else if (output is ISolution s)
-            {
-                var solution = new CreateSolution(s, _output);
-                solution.Create(outputPath);
-            }
-            else if (output is IFileCopy fc)
-            {
-                var copier = new FileCopier(fc, false, _output);
-                copier.Copy(outputPath);
-            }
-            else if (output is IFolderCopy fo)
-            {
-                var copier = new FolderCopier(fo, false, _output);
-                copier.Copy(outputPath);
-            }
-            else
-                _output?.Invoke($"Output type '{output?.GetType().FullName}' is not supported.");
-
+            _output?.Invoke($"Creating: {outputPath}");
+            var file = _creator.Create(output);
+            _fileWriter.Write(file);
             _output?.Invoke("Generation complete.");
         }
     }

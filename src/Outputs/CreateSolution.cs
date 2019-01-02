@@ -5,11 +5,13 @@ namespace Hy.Modeller.Outputs
 {
     internal class CreateSolution
     {
+        private readonly IFileWriter _fileWriter;
         private readonly ISolution _solution;
         private readonly Action<string> _output;
 
-        public CreateSolution(ISolution solution, Action<string> output)
+        public CreateSolution(IFileWriter fileWriter, ISolution solution, Action<string> output)
         {
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
             _solution = solution ?? throw new ArgumentNullException(nameof(solution));
             _output = output;
         }
@@ -23,13 +25,13 @@ namespace Hy.Modeller.Outputs
 
             foreach (var file in _solution.Files)
             {
-                var fileOutput = new CreateFile(file, _output);
+                var fileOutput = new CreateFile(_fileWriter, file, _output);
                 fileOutput.Create(_solution.Directory);
             }
 
             foreach (var project in _solution.Projects)
             {
-                var projectOutput = new CreateProject(project, _output);
+                var projectOutput = new CreateProject(_fileWriter, project, _output);
                 projectOutput.Create(_solution.Directory);
             }
         }

@@ -1,5 +1,10 @@
 ﻿using FluentAssertions;
-using System.Linq;
+using Hy.Modeller.Core.Outputs;
+using Hy.Modeller.Interfaces;
+using Hy.Modeller.Outputs;
+using Moq;
+using System;
+using System.Text;
 using Xunit;
 
 namespace Hy.Modeller.CoreTests
@@ -14,44 +19,59 @@ namespace Hy.Modeller.CoreTests
         }
     }
 
-    public class TargetFacts
+    internal class TestFile : IFile
+    {
+        private readonly string _name;
+        public TestFile()
+        {
+            _name = System.IO.Path.GetTempFileName();
+        }
+
+        string IFile.Content { get; set; }
+        string IFile.Path { get; set; }
+        string IFile.FullName { get; }
+        bool IFile.CanOverwrite { get; set; }
+        string IOutput.Name => _name;
+    }
+
+    internal class TestFileWriter : IFileWriter
+    {
+        public string Output { get; private set; }
+
+        void IFileWriter.Write(IFile file) {
+            Output = file.Content;
+        }
+    }
+
+    public class OutputCreatorFacts
     {
         [Fact]
-        public void Targets_Default_ReturnsExpectedValue()
+        public void Creator_Creates_ExpectedSnippetOutput()
         {
-            var sut = new Targets();
-            sut.Default.Should().Be(sut.Supported.First());
-        }
+            var sb = new StringBuilder();
+            var context = new Mock<IContext>();
+            context.Setup(c => c.OutputPath).Returns("myPath");
+            var output = new Mock<ISnippet>();
 
-        [Fact]
-        public void Targets_Supported_ReturnsExpectedCount()
-        {
-            var sut = new Targets();
-            sut.Supported.Should().HaveCount(1);
-        }
+            var writer = new Mock<IFileWriter>();
+            var creator = new Mock<IFileCreator>();
 
-        [Fact]
-        public void Targets_Shared_ReturnsSameInstance()
-        {
-            var sut = Targets.Shared;
-            var another = Targets.Shared;
+            //var writer = new TestFileWriter();
+            //var fileFactory = new FileFactory(new Lazy<IFile>(() =>
+            //{
+            //    IFile file = new TestFile();
+            //    file.Content = "My test content";
+            //    return file;
+            //}));
+            //var fileWriterFactory = new FileWriterFactory(new Lazy<IFileWriter>(() => writer));
 
-            sut.Should().BeSameAs(another);
+            var sut = new Creator(context.Object,writer.Object,creator.Object , s=>sb.AppendLine(s));
+                       
+            sut.Create(output.Object);
 
-            sut.RegisterTarget("new One");
-            another.Supported.Should().Contain("new one");
-        }
 
-        [Fact]
-        public void Targets_Reset_ReturnsSupportedToDefault()
-        {
-            var sut = new Targets();
-            sut.RegisterTarget("new");
-            sut.Supported.Should().HaveCount(2);
-
-            sut.Reset();
-
-            sut.Supported.Should().HaveCount(1);
+            sb.ToString().Should().Match("Creating: myPath\r\nFile: myPath\\myPath\\Snippets\\tmp*.txt\r\nGeneration complete.\r\n");
+            output.Verify(s => s.Content, Times.AtLeastOnce);
         }
     }
 }

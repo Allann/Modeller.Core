@@ -5,11 +5,13 @@ namespace Hy.Modeller.Outputs
 {
     internal class CreateProject
     {
+        private readonly IFileWriter _fileWriter;
         private readonly IProject _project;
         private readonly Action<string> _output;
 
-        public CreateProject(IProject project, Action<string> output)
+        public CreateProject(IFileWriter fileWriter, IProject project, Action<string> output)
         {
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
             _project = project ?? throw new ArgumentNullException(nameof(project));
             _output = output;
         }
@@ -30,7 +32,7 @@ namespace Hy.Modeller.Outputs
                     var filePath = (string.IsNullOrWhiteSpace(file.Path) || groupPath.Contains(file.Path)) ? groupPath : System.IO.Path.Combine(groupPath, file.Path);
                     file.Path = filePath;
 
-                    var fileOutput = new CreateFile(file, _output);
+                    var fileOutput = new CreateFile(_fileWriter, file, _output);
                     fileOutput.Create(_project.Path);
                 }
             }

@@ -1,15 +1,18 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Core.Outputs;
+using Hy.Modeller.Interfaces;
 using System;
 
 namespace Hy.Modeller.Outputs
 {
     internal class CreateFile
     {
+        private readonly IFileWriter _fileWriter;
         private readonly IFile _file;
         private readonly Action<string> _output;
 
-        public CreateFile(IFile file, Action<string> output)
+        public CreateFile(IFileWriter fileWriter, IFile file, Action<string> output = null)
         {
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
             _file = file ?? throw new ArgumentNullException(nameof(file));
             _output = output;
         }
@@ -21,7 +24,7 @@ namespace Hy.Modeller.Outputs
             else if (!System.IO.Path.IsPathRooted(_file.Path))
                 _file.Path = System.IO.Path.Combine(basePath, _file.Path);
 
-            _file.Write(_file.CanOverwrite);
+            _fileWriter.Write(_file);
 
             _output?.Invoke($"File: {_file.FullName}");
         }

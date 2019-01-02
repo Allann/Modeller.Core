@@ -1,15 +1,18 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Core.Outputs;
+using Hy.Modeller.Interfaces;
 using System;
 
 namespace Hy.Modeller.Outputs
 {
     internal class CreateFileGroup
     {
+        private readonly IFileWriter _fileWriter;
         private readonly IFileGroup _fileGroup;
         private readonly Action<string> _output;
 
-        public CreateFileGroup(IFileGroup fileGroup, Action<string> output)
+        public CreateFileGroup(IFileWriter fileWriter, IFileGroup fileGroup, Action<string> output)
         {
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
             _fileGroup = fileGroup ?? throw new ArgumentNullException(nameof(fileGroup));
             _output = output;
         }
@@ -24,7 +27,7 @@ namespace Hy.Modeller.Outputs
             _output?.Invoke($"Filegroup: {_fileGroup.Name}");
             foreach (var file in _fileGroup.Files)
             {
-                var fileOutput = new CreateFile(file, _output);
+                var fileOutput = new CreateFile(_fileWriter, file, _output);
                 fileOutput.Create(_fileGroup.Path);
             }
         }

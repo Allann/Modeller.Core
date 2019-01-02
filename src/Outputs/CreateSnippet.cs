@@ -1,15 +1,20 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Core.Outputs;
+using Hy.Modeller.Interfaces;
 using System;
 
 namespace Hy.Modeller.Outputs
 {
     internal class CreateSnippet
     {
+        private readonly IFileWriter _writer;
+        private readonly IFileCreator _fileCreator;
         private readonly ISnippet _snippet;
         private readonly Action<string> _output;
 
-        public CreateSnippet(ISnippet snippet, Action<string> output = null)
+        public CreateSnippet(IFileWriter writer, IFileCreator filecreator, ISnippet snippet, Action<string> output = null)
         {
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            _fileCreator = filecreator ?? throw new ArgumentNullException(nameof(filecreator));
             _snippet = snippet ?? throw new ArgumentNullException(nameof(snippet));
             _output = output;
         }
@@ -29,16 +34,11 @@ namespace Hy.Modeller.Outputs
             if (string.IsNullOrEmpty(ext) || ext != ".txt")
                 filename += ".txt";
 
-            var f = new Outputs.File
-            {
-                Path = System.IO.Path.Combine(outputPath, "Snippets"),
-                Name = filename,
-                Content = _snippet.Content
-            };
+            var f = _fileCreator.Create(_snippet);
+            f.Path = System.IO.Path.Combine(outputPath, "Snippets");
 
-            var fileOutput = new CreateFile(f, _output);
+            var fileOutput = new CreateFile(_writer, f, _output);
             fileOutput.Create(basePath);
         }
     }
-
 }

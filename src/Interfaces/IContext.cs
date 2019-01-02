@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Hy.Modeller.Interfaces;
 using Hy.Modeller.Models;
 
-namespace Hy.Modeller.Generator
+namespace Hy.Modeller.Interfaces
 {
     public interface IContext
     {
