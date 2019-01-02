@@ -5,11 +5,13 @@ namespace Hy.Modeller.Generator
 {
     internal class SettingsValidator : ValidatorBase
     {
+        private readonly ISettings _settings;
         private readonly ISettingsLoader _loader;
 
-        public SettingsValidator(Context context, ISettingsLoader loader)
+        public SettingsValidator(ISettings settings, Context context, ISettingsLoader loader)
             : base(context)
         {
+            _settings = settings;
             _loader = loader ?? throw new ArgumentNullException(nameof(loader));
         }
 
@@ -19,14 +21,14 @@ namespace Hy.Modeller.Generator
             {
                 if (string.IsNullOrWhiteSpace(Context.SettingsFile))
                 {
-                    Context.SetSettings(new Settings());
+                    Context.SetSettings(_settings);
                     return;
                 }
 
-                var settings = _loader.Load<Settings>(Context.SettingsFile);
+                var settings = _loader.Load<ISettings>(Context.SettingsFile);
                 if (settings == null)
                 {
-                    Context.SetSettings(new Settings());
+                    Context.SetSettings(_settings);
                 }
                 else
                 {

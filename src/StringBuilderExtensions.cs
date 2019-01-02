@@ -2,11 +2,13 @@
 
 namespace Hy.Modeller.Outputs
 {
-    static class StringBuildExtensions
+    public static class StringBuilderExtensions
     {
-        internal static StringBuilder Indent(this StringBuilder sb, int indent = 1)
+        public static StringBuilder Indent(this StringBuilder sb, int indent = 1, int spaces = 4)
         {
-            sb.Append(new string(' ', indent * 4));
+            if (spaces < 1 || spaces > 8)
+                spaces = 4;
+            sb.Append(new string(' ', indent * spaces));
             return sb;
         }
     }

@@ -61,7 +61,7 @@ namespace Hy.Modeller.Generator
             var mv = new ModuleValidator(this, loader);
             var gv = new GeneratorValidator(this);
             var settingsLoader = new JsonSettingsLoader();
-            var sv = new SettingsValidator(this, settingsLoader);
+            var sv = new SettingsValidator(Settings, this, settingsLoader);
             var cv = new ContextValidator(this);
 
             var validators = new List<IValidator> { mv, gv, sv, cv };

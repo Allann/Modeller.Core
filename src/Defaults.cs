@@ -11,7 +11,7 @@ namespace Hy.Modeller
 
         public static string ServerFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Resources), "Company", "Generators");
 
-        public static string Target => Targets.Default;
+        public static string Target => Targets.Shared.Default;
 
         public static Version Version => new Version();
     }

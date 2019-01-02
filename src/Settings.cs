@@ -1,4 +1,5 @@
 ﻿using Hy.Modeller.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,11 @@ namespace Hy.Modeller
 {
     public class Settings : ISettings
     {
+        public Settings(IGeneratorContext context)
+        {
+            Context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
         public bool SupportRegen { get; set; } = true;
 
         public string GetPackageVersion(string name)
@@ -31,7 +37,15 @@ namespace Hy.Modeller
             }
             if (packages.Count() == 1)
             {
-                packages.First().Version = package.Version;
+                var p = packages.First();
+                if(Version.TryParse(p.Version, out var p1))
+                {
+                    if(Version.TryParse(package.Version, out var p2))
+                    {
+                        if (p1 < p2)
+                            p.Version = p2.ToString();
+                    }
+                }
                 return;
             }
         }
@@ -46,6 +60,6 @@ namespace Hy.Modeller
 
         public bool PackagesInitialised() => Context.Packages.Any();
 
-        public GeneratorContext Context { get; } = new GeneratorContext();
+        public IGeneratorContext Context { get; } 
     }
 }

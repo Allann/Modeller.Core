@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Hy.Modeller.Interfaces;
+using System.Collections.Generic;
 
 namespace Hy.Modeller
 {
-    public class GeneratorContext
+    public class GeneratorContext : IGeneratorContext
     {
         public string SourceModel { get; set; }
         public string OutputPath { get; set; }
