@@ -26,7 +26,7 @@ namespace Hy.Modeller.Outputs
 
             foreach (var fg in _project.FileGroups)
             {
-                var groupPath = string.IsNullOrWhiteSpace(fg.Path) ? path : System.IO.Path.Combine(path, fg.Path);
+                var groupPath = string.IsNullOrWhiteSpace(fg.Name) ? path : System.IO.Path.Combine(path, fg.Name);
                 foreach (var file in fg.Files)
                 {
                     var filePath = (string.IsNullOrWhiteSpace(file.Path) || groupPath.Contains(file.Path)) ? groupPath : System.IO.Path.Combine(groupPath, file.Path);

@@ -19,16 +19,16 @@ namespace Hy.Modeller.Outputs
 
         internal void Create(string basePath)
         {
-            if (string.IsNullOrWhiteSpace(_fileGroup.Path))
-                _fileGroup.Path = basePath;
-            else if (!System.IO.Path.IsPathRooted(_fileGroup.Path))
-                _fileGroup.Path = System.IO.Path.Combine(basePath, _fileGroup.Path);
+            if (string.IsNullOrWhiteSpace(_fileGroup.Name))
+                _fileGroup.SetPath(basePath);
+            else if (!System.IO.Path.IsPathRooted(_fileGroup.Name))
+                _fileGroup.SetPath(System.IO.Path.Combine(basePath, _fileGroup.Name));
 
             _output?.Invoke($"Filegroup: {_fileGroup.Name}");
             foreach (var file in _fileGroup.Files)
             {
                 var fileOutput = new CreateFile(_fileWriter, file, _output);
-                fileOutput.Create(_fileGroup.Path);
+                fileOutput.Create(_fileGroup.Name);
             }
         }
     }

@@ -21,14 +21,12 @@ namespace Hy.Modeller.Outputs
 
         public void Create(IOutput output)
         {
-            if (output == null)
-                return;
-
             var outputPath = Context.OutputPath;
             if (string.IsNullOrWhiteSpace(outputPath))
                 outputPath = Defaults.OutputFolder;
 
             _output?.Invoke($"Creating: {outputPath}");
+
             var file = _creator.Create(output);
             _fileWriter.Write(file);
             _output?.Invoke("Generation complete.");

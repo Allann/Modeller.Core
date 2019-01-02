@@ -20,7 +20,7 @@ namespace Hy.Modeller.Outputs
         {
             if (!System.IO.Path.IsPathRooted(_fc.Destination))
             {
-                _fc.Destination = !string.IsNullOrWhiteSpace(_fc.Destination) ? System.IO.Path.Combine(basePath, _fc.Destination) : basePath;
+                _fc.SetPath(!string.IsNullOrWhiteSpace(_fc.Destination) ? System.IO.Path.Combine(basePath, _fc.Destination) : basePath);
             }
 
             try

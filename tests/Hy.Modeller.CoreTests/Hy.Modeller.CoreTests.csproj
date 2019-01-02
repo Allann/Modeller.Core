@@ -21,10 +21,4 @@
     <ProjectReference Include="..\..\src\Hy.Modeller.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Hy.Modeller.Base">
-      <HintPath>..\..\..\Modeller.Base.git\src\bin\Debug\netstandard2.0\Hy.Modeller.Base.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

@@ -200,6 +200,8 @@ namespace Hy.Modeller
             public string Description { get; }
             public Type EntryPoint { get; }
             public IEnumerable<Type> SubGenerators { get; }
+            public bool IsAlphaRelease { get; }
+            public bool IsBetaRelease { get; }
         }
     }
 }
