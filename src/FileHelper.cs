@@ -51,77 +51,6 @@ namespace Hy.Modeller
             }
         }
 
-        public static IEnumerable<GeneratorItem> GetAvailableGenerators(string localFolder = null)
-        {
-            if (string.IsNullOrWhiteSpace(localFolder))
-            {
-                localFolder = Defaults.LocalFolder;
-            }
-            var local = new DirectoryInfo(localFolder);
-
-            var list = new List<GeneratorItem>();
-            if (!local.Exists)
-            {
-                return list;
-            }
-
-            AddFiles(list, local);
-            return list;
-        }
-
-        private static void AddFiles(List<GeneratorItem> list, DirectoryInfo folder)
-        {
-            foreach (var subFolder in folder.GetDirectories())
-            {
-                AddFiles(list, subFolder);
-            }
-
-            var asmLoader = new GeneratorLoader(folder.FullName);
-            foreach (var file in folder.GetFiles("*.dll"))
-            {
-                var deps = file.FullName.Substring(0, file.FullName.Length - 3) + "deps.json";
-                if (!File.Exists(deps))
-                    continue;
-
-                var ass = asmLoader.Load(file.FullName);
-                var dt = ass.DefinedTypes;
-                var metaDataTypes = dt.Where(t => t.ImplementedInterfaces.Any(it => it.FullName == "Hy.Modeller.Interfaces.IMetadata"));
-                foreach (var type in metaDataTypes)
-                {
-                    if (type.IsAbstract || type.IsInterface || !type.IsPublic)
-                        continue;
-
-                    var obj = Activator.CreateInstance(type);
-                    if (obj == null)
-                        continue;
-
-                    if (obj is IMetadata instance)
-                    {
-                        var entryPoint = instance.EntryPoint;
-                        if (entryPoint == null)
-                        {
-                            continue;
-                        }
-                        list.Add(new GeneratorItem(instance, file.FullName, entryPoint));
-                    }
-                    else
-                    {
-                        var name = type.GetProperty("Name")?.GetValue(obj).ToString();
-                        var description = type.GetProperty("Description")?.GetValue(obj).ToString();
-                        var entryPoint = type.GetProperty("EntryPoint")?.GetValue(obj) as Type;
-                        var subGenerators = type.GetProperty("SubGenerators")?.GetValue(obj) as IEnumerable<Type>;
-                        var version = type.GetProperty("Version")?.GetValue(obj) as Version;
-
-                        if (string.IsNullOrEmpty(name) || entryPoint == null)
-                            continue;
-
-                        var md = new TempGeneratorDetail(name, description, entryPoint, subGenerators, version);
-                        list.Add(new GeneratorItem(md, file.FullName, entryPoint));
-                    }
-                }
-            }
-        }
-
         public static bool UpdateLocalGenerators(string serverFolder = null, string localFolder = null, bool overwrite = false, Action<string> output = null)
         {
             if (string.IsNullOrWhiteSpace(localFolder))
@@ -185,23 +114,5 @@ namespace Hy.Modeller
             }
         }
 
-        private class TempGeneratorDetail : IMetadata
-        {
-            public TempGeneratorDetail(string name, string description, Type entryPoint, IEnumerable<Type> subGenerators, Version version)
-            {
-                Name = name;
-                Description = description;
-                EntryPoint = entryPoint;
-                SubGenerators = subGenerators;
-                Version = version;
-            }
-            public Version Version { get; }
-            public string Name { get; }
-            public string Description { get; }
-            public Type EntryPoint { get; }
-            public IEnumerable<Type> SubGenerators { get; }
-            public bool IsAlphaRelease { get; }
-            public bool IsBetaRelease { get; }
-        }
     }
 }

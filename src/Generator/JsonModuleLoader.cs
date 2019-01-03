@@ -6,7 +6,7 @@ namespace Hy.Modeller.Generator
 {
     internal class JsonModuleLoader : IModuleLoader
     {
-        public Models.Module Load(string filePath)
+        private Models.Module Process(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -21,11 +21,16 @@ namespace Hy.Modeller.Generator
             return model.FromJson<Models.Module>();
         }
 
-        public bool TryLoad(string filePath, out Models.Module module)
+        Models.Module IModuleLoader.Load(string filePath)
+        {
+            return Process(filePath);
+        }
+
+        bool IModuleLoader.TryLoad(string filePath, out Models.Module module)
         {
             try
             {
-                module = Load(filePath);
+                module = Process(filePath);
                 return true;
             }
             catch

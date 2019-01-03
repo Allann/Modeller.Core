@@ -11,7 +11,7 @@ namespace Hy.Modeller.CoreTests
         [Fact]
         public void Setting_SupportRegen_DefaultstoTrue()
         {
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
 
             var sut = new Settings(context.Object);
             sut.SupportRegen.Should().BeTrue();
@@ -20,7 +20,7 @@ namespace Hy.Modeller.CoreTests
         [Fact]
         public void Setting_GetPackageVersion_ReturnsContextPackageVersion()
         {
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(new List<Package> { new Package("Package1", "1.2.3") });
 
             var sut = new Settings(context.Object);
@@ -30,7 +30,7 @@ namespace Hy.Modeller.CoreTests
         [Fact]
         public void Setting_GetPackageVersion_ReturnsEmptyString_WhenNoPackages()
         {
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
 
             var sut = new Settings(context.Object);
             sut.GetPackageVersion("Package1").Should().Be("");
@@ -40,7 +40,7 @@ namespace Hy.Modeller.CoreTests
         public void Setting_RegisterPackageViaObject_Succeeds()
         {
             var packages = new List<Package>();
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);
@@ -53,7 +53,7 @@ namespace Hy.Modeller.CoreTests
         public void Setting_RegisterNullPackageViaObject_DoesNotError()
         {
             var packages = new List<Package>();
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);
@@ -66,7 +66,7 @@ namespace Hy.Modeller.CoreTests
         public void Setting_RegisterPackageViaName_Succeeds()
         {
             var packages = new List<Package>();
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);
@@ -80,7 +80,7 @@ namespace Hy.Modeller.CoreTests
         {
             var packages = new List<Package>();
             var newPackages = new List<Package> { new Package("Package1", "1.2.3"), new Package("name","1.0") };
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);
@@ -98,7 +98,7 @@ namespace Hy.Modeller.CoreTests
         public void Setting_RegisterPackageViaName_DoesNotErrorWhenNameIsNull(string name, string version)
         {
             var packages = new List<Package>();
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);
@@ -117,7 +117,7 @@ namespace Hy.Modeller.CoreTests
         public void Setting_RegisterExistingPackage_OnlyUpdatesToLatestVersion(string version, string expected)
         {
             var packages = new List<Package> { new Package("name","2.0")};
-            var context = new Mock<IGeneratorContext>();
+            var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
             var sut = new Settings(context.Object);

@@ -5,11 +5,11 @@ using System.Reflection;
 
 namespace Hy.Modeller
 {
-    internal class GeneratorLoader
+    internal class AssemblyLoader
     {
         private readonly string _folderPath;
 
-        public GeneratorLoader(string folderPath)
+        public AssemblyLoader(string folderPath)
         {
             _folderPath = folderPath;
         }

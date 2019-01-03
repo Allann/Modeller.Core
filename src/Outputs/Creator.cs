@@ -21,7 +21,7 @@ namespace Hy.Modeller.Outputs
 
         public void Create(IOutput output)
         {
-            var outputPath = Context.OutputPath;
+            var outputPath = Context.GeneratorConfiguration.OutputPath;
             if (string.IsNullOrWhiteSpace(outputPath))
                 outputPath = Defaults.OutputFolder;
 

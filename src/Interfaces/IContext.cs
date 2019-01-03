@@ -7,22 +7,12 @@ namespace Hy.Modeller.Interfaces
 {
     public interface IContext
     {
-        string Folder { get; }
-        string GeneratorName { get; }
-        string Target { get; }
-        Version Version { get; }
-
-        GeneratorItem Generator { get; }
-        bool IsValid { get; }
-        Model Model { get; }
-        string ModelName { get; }
-        Module Module { get; }
-        string ModuleFile { get; }
-        string OutputPath { get; }
-        ISettings Settings { get; }
-        string SettingsFile { get; }
-        IReadOnlyCollection<string> ValidationMessages { get; }
-
-        void Validate();
+        IGeneratorConfiguration GeneratorConfiguration { get; }
+        GeneratorItem Generator { get; set; }
+        Model Model { get; set; }
+        Module Module { get; set; }
+        ISettings Settings { get; set; }
+        Version Version { get; set; }
+        string TargetFolder { get; }
     }
 }

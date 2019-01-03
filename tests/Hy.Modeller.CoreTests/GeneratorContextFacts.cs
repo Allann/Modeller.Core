@@ -1,43 +1,41 @@
 ﻿using FluentAssertions;
-using Hy.Modeller.Generator;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Hy.Modeller.CoreTests
 {
-    public class GeneratorContextFacts
+    public class GeneratorConfigurationFacts
     {
         [Fact]
-        public void GeneratorContext_Defaults_AreSetOnConstructor()
+        public void GeneratorConfiguration_Packages_DontReturnNull()
         {
-            var sut = new GeneratorContext();
+            var sut = new GeneratorConfiguration();
             sut.Packages.Should().NotBeNull();
         }
-    }
 
-    public class ContextFacts
-    {
-        [Fact]
-        public void Context_Constructor()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void GeneratorConfiguration_Target_ReturnsExpectedValues(string value)
         {
-            var sb = new StringBuilder();
-            Action<string> a = (s) => sb.AppendLine(s);
+            var sut = new GeneratorConfiguration();
 
-            var sut = new Context("model.json", "c:\\local", "class", "target", "1.0", "settings.json", "model", "c:\\output", a);
+            sut.Target = value;
 
-            //sut.IsValid.Should().BeTrue();
-            var list = new List<string>()
-            {
-                "Module file 'model.json' does not exist.",
-                "Local folder not found 'c:\\local'",
-                "Settings file 'settings.json' does not exist.",
-                "Context Module not defined.",
-                "Context Generator not defined.",
-                "Context Settings not defined."
-            };
-            sut.ValidationMessages.Should().BeEquivalentTo(list);
+            sut.Target.Should().Be(Defaults.Target);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void GeneratorConfiguration_LocalFolder_ReturnsExpectedValues(string value)
+        {
+            var sut = new GeneratorConfiguration();
+
+            sut.LocalFolder = value;
+
+            sut.LocalFolder.Should().Be(Defaults.LocalFolder);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Hy.Modeller.Interfaces
 {
-    internal interface ISettingsLoader
+    public interface ISettingsLoader
     {
         ISettings Load<T>(string filePath)
             where T : ISettings;

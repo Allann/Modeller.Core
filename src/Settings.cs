@@ -7,7 +7,7 @@ namespace Hy.Modeller
 {
     public class Settings : ISettings
     {
-        public Settings(IGeneratorContext context)
+        public Settings(IGeneratorConfiguration context)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -60,6 +60,6 @@ namespace Hy.Modeller
 
         public bool PackagesInitialised() => Context.Packages.Any();
 
-        public IGeneratorContext Context { get; } 
+        public IGeneratorConfiguration Context { get; } 
     }
 }

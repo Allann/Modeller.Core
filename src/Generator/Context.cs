@@ -1,105 +1,64 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using FluentValidation.Results;
+using Hy.Modeller.Core.Validators;
+using Hy.Modeller.Interfaces;
 using Hy.Modeller.Models;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Hy.Modeller.Generator
 {
     public class Context : IContext
     {
-        private IList<string> _issues = new List<string>();
-        private readonly Action<string> _output;
+        private readonly ISettingsLoader _settingsLoader;
+        private readonly IModuleLoader _moduleLoader;
+        private readonly IGeneratorLoader _generatorLoader;
 
-        public Context(string moduleFile, string folder, string generator, string target, string version, string settingsFile, string modelName, string outputPath, Action<string> output = null)
+        public Context(IGeneratorConfiguration generatorConfiguration, ISettingsLoader settingsLoader, IModuleLoader moduleLoader, IGeneratorLoader generatorLoader)
         {
-            SetFolder(folder);
-            SetTarget(target);
-            SetGeneratorName(generator, version);
-            SetOutputPath(outputPath);
+            GeneratorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
+            _settingsLoader = settingsLoader ?? throw new ArgumentNullException(nameof(settingsLoader));
+            _moduleLoader = moduleLoader ?? throw new ArgumentNullException(nameof(moduleLoader));
+            _generatorLoader = generatorLoader ?? throw new ArgumentNullException(nameof(generatorLoader));
 
-            ModuleFile = moduleFile;
-            SettingsFile = settingsFile;
-            ModelName = modelName;
-            _output = output;
-            Validate();
+            ProcessConfiguration();
         }
 
-        public string GeneratorName { get; private set; }
+        public GeneratorItem Generator { get; set; }
 
-        public GeneratorItem Generator { get; private set; }
+        public Module Module { get; set; }
 
-        public string Folder { get; private set; }
+        public ISettings Settings { get; set; }
 
-        public Module Module { get; private set; }
+        public Version Version { get; set; }
 
-        public string ModuleFile { get; }
+        public Model Model { get; set; }
 
-        public string ModelName { get; }
+        public string TargetFolder => !string.IsNullOrWhiteSpace(GeneratorConfiguration.LocalFolder) && !string.IsNullOrWhiteSpace(GeneratorConfiguration.Target) ? System.IO.Path.Combine(GeneratorConfiguration.LocalFolder, GeneratorConfiguration.Target) : null;
 
-        public string OutputPath { get; private set; }
+        public IGeneratorConfiguration GeneratorConfiguration { get; }
 
-        public ISettings Settings { get; private set; }
-
-        public string SettingsFile { get; }
-
-        public string Target { get; private set; }
-
-        public Version Version { get; private set; }
-
-        public Model Model { get; private set; }
-
-        public bool IsValid => !_issues.Any();
-
-        public IReadOnlyCollection<string> ValidationMessages => new ReadOnlyCollection<string>(_issues);
-
-        public void Validate()
+        public ValidationResult ProcessConfiguration()
         {
-            // create validators
-            var loader = new JsonModuleLoader();
-            var mv = new ModuleValidator(this, loader);
-            var gv = new GeneratorValidator(this);
-            var settingsLoader = new JsonSettingsLoader();
-            var sv = new SettingsValidator(Settings, this, settingsLoader);
-            var cv = new ContextValidator(this);
-
-            var validators = new List<IValidator> { mv, gv, sv, cv };
-
-            // execute validation
-            foreach (var validator in validators)
+            var name = GeneratorConfiguration.GeneratorName?.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(name))
             {
-                validator.Validate();
-            }
-
-            if (_output != null)
-            {
-                // output the errors
-                foreach (var issue in _issues)
+                if (_generatorLoader.TryLoad(GeneratorConfiguration.LocalFolder, out var generators))
                 {
-                    _output.Invoke(issue);
+                    var matches = generators.Where(g => g.Metadata.Name.ToLowerInvariant() == name || g.AbbreviatedFileName.ToLowerInvariant() == name);
+                    var exact = matches.SingleOrDefault(m => m.Metadata.Version == Version);
+                    Generator = exact ?? matches.OrderByDescending(k => k.Metadata.Version).First();
                 }
             }
+
+            if (!string.IsNullOrEmpty(GeneratorConfiguration.SettingsFile))
+                Settings = _settingsLoader.Load<ISettings>(GeneratorConfiguration.SettingsFile);
+
+            if (!string.IsNullOrEmpty(GeneratorConfiguration.SourceModel))
+                Module = _moduleLoader.Load(GeneratorConfiguration.SourceModel);
+
+            var configValidator = new ContextValidator();
+            return configValidator.Validate(this);
         }
-
-        internal void SetFolder(string value) => Folder = string.IsNullOrWhiteSpace(value) ? Defaults.LocalFolder : value;
-
-        internal void SetGeneratorName(string generator, string version)
-        {
-            if (!Version.TryParse(version, out var vers))
-            {
-                Version = Defaults.Version;
-            }
-            GeneratorName = generator;
-        }
-
-        internal void SetGenerator(GeneratorItem generator) => Generator = generator;
-
-        internal void SetModule(Module module) => Module = module;
-
-        internal void SetModel(Model model) => Model = model;
-
-        internal void SetOutputPath(string path) => OutputPath = path;
 
         internal void SetSettings(ISettings settings)
         {
@@ -109,16 +68,6 @@ namespace Hy.Modeller.Generator
                 var ps = new PackageService(new PackageFileLoader());
                 Settings.RegisterPackages(ps.Items);
             }
-        }
-
-        internal void SetTarget(string value) => Target = string.IsNullOrWhiteSpace(value) ? Defaults.Target : value;
-
-        internal void AddIssue(string issue)
-        {
-            if (!string.IsNullOrWhiteSpace(issue))
-                _issues.Add(issue);
-            else
-                _issues.Add("Unknown issue added, but details were not included.");
         }
     }
 }

@@ -31,37 +31,37 @@ namespace Hy.Modeller.Generator
         {
             var rows = new List<List<string>>();
 
-            var generators = FileHelper.GetAvailableGenerators(folder);
-            foreach (var generator in generators)
-            {
-                var abbr = FileHelper.GetAbbreviatedFilename(generator.FilePath);
-                var m = generator.Metadata;
-                if (verbose)
-                {
-                    rows.Add(new List<string> { abbr, m.Name, m.Version.ToString(), m.Description });
-                }
-                else
-                {
-                    rows.Add(new List<string> { abbr, m.Name, m.Version.ToString() });
-                }
-            }
+            //var generators = FileHelper.GetAvailableGenerators(folder);
+            //foreach (var generator in generators)
+            //{
+            //    var abbr = FileHelper.GetAbbreviatedFilename(generator.FilePath);
+            //    var m = generator.Metadata;
+            //    if (verbose)
+            //    {
+            //        rows.Add(new List<string> { abbr, m.Name, m.Version.ToString(), m.Description });
+            //    }
+            //    else
+            //    {
+            //        rows.Add(new List<string> { abbr, m.Name, m.Version.ToString() });
+            //    }
+            //}
 
-            if (rows.Any())
-            {
-                var cols = verbose ? 3 : 2;
-                var widths = new List<int>(cols);
-                for (var col = 0; col < cols; col++)
-                {
-                    widths.Add(rows.Max(l => l[col].Length));
-                }
-                foreach (var row in rows)
-                {
-                    for (var col = 0; col < cols; col++)
-                    {
-                        row[col] = row[col].PadRight(widths[col]) + " | ";
-                    }
-                }
-            }
+            //if (rows.Any())
+            //{
+            //    var cols = verbose ? 3 : 2;
+            //    var widths = new List<int>(cols);
+            //    for (var col = 0; col < cols; col++)
+            //    {
+            //        widths.Add(rows.Max(l => l[col].Length));
+            //    }
+            //    foreach (var row in rows)
+            //    {
+            //        for (var col = 0; col < cols; col++)
+            //        {
+            //            row[col] = row[col].PadRight(widths[col]) + " | ";
+            //        }
+            //    }
+            //}
 
             return rows;
         }

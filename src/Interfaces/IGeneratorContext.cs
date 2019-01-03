@@ -2,15 +2,15 @@
 
 namespace Hy.Modeller.Interfaces
 {
-    public interface IGeneratorContext
+    public interface IGeneratorConfiguration
     {
-        string Generator { get; set; }
+        string GeneratorName { get; set; }
         string LocalFolder { get; set; }
         string ModelName { get; set; }
         string OutputPath { get; set; }
         List<Package> Packages { get; set; }
         string ServerFolder { get; set; }
-        string Settings { get; set; }
+        string SettingsFile { get; set; }
         string SourceModel { get; set; }
         string Target { get; set; }
         bool Verbose { get; set; }
