@@ -13,7 +13,7 @@ namespace Hy.Modeller.CoreTests
         {
             var context = new Mock<IGeneratorConfiguration>();
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.SupportRegen.Should().BeTrue();
         }
 
@@ -23,7 +23,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(new List<Package> { new Package("Package1", "1.2.3") });
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.GetPackageVersion("Package1").Should().Be("1.2.3");
         }
 
@@ -32,7 +32,7 @@ namespace Hy.Modeller.CoreTests
         {
             var context = new Mock<IGeneratorConfiguration>();
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.GetPackageVersion("Package1").Should().Be("");
         }
 
@@ -43,7 +43,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackage(new Package("Package1", "1.2.3"));
 
             sut.GetPackageVersion("Package1").Should().Be("1.2.3");
@@ -56,7 +56,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackage(null);
 
             sut.PackagesInitialised().Should().BeFalse();
@@ -69,7 +69,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackage("Package1", "1.2.3");
 
             sut.GetPackageVersion("Package1").Should().Be("1.2.3");
@@ -83,7 +83,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackages(newPackages);
 
             sut.GetPackageVersion("Package1").Should().Be("1.2.3");
@@ -101,7 +101,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackage(name, version);
 
             sut.PackagesInitialised().Should().BeFalse();
@@ -120,7 +120,7 @@ namespace Hy.Modeller.CoreTests
             var context = new Mock<IGeneratorConfiguration>();
             context.Setup(c => c.Packages).Returns(packages);
 
-            var sut = new Settings(context.Object);
+            ISettings sut = new Settings(context.Object);
             sut.RegisterPackage("name", version);
 
             sut.GetPackageVersion("name").Should().Be(expected);

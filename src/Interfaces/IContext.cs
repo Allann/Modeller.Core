@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Base.Models;
 using Hy.Modeller.Models;
 
 namespace Hy.Modeller.Interfaces
@@ -12,7 +10,7 @@ namespace Hy.Modeller.Interfaces
         Model Model { get; set; }
         Module Module { get; set; }
         ISettings Settings { get; set; }
-        Version Version { get; set; }
+        GeneratorVersion Version { get; set; }
         string TargetFolder { get; }
     }
 }

@@ -11,10 +11,8 @@ namespace Hy.Modeller
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
         }
-
-        public bool SupportRegen { get; set; } = true;
-
-        public string GetPackageVersion(string name)
+        
+        string ISettings.GetPackageVersion(string name)
         {
             if (Context.Packages == null || !Context.Packages.Any())
                 return "";
@@ -22,9 +20,22 @@ namespace Hy.Modeller
             return found == null ? "" : found.Version;
         }
 
-        public void RegisterPackage(string name, string version) => RegisterPackage(new Package(name, version));
+        void ISettings.RegisterPackage(Package package)
+        {
+            Register(package);
+        }
 
-        public void RegisterPackage(Package package)
+        void ISettings.RegisterPackage(string name, string version) => Register(new Package(name, version));
+
+        void ISettings.RegisterPackages(IEnumerable<Package> packages)
+        {
+            foreach (var item in packages)
+            {
+                Register(item);
+            }
+        }
+
+        private void Register(Package package)
         {
             if (package == null || string.IsNullOrWhiteSpace(package.Name) || string.IsNullOrWhiteSpace(package.Version))
                 return;
@@ -38,9 +49,9 @@ namespace Hy.Modeller
             if (packages.Count() == 1)
             {
                 var p = packages.First();
-                if(Version.TryParse(p.Version, out var p1))
+                if (Version.TryParse(p.Version, out var p1))
                 {
-                    if(Version.TryParse(package.Version, out var p2))
+                    if (Version.TryParse(package.Version, out var p2))
                     {
                         if (p1 < p2)
                             p.Version = p2.ToString();
@@ -50,16 +61,22 @@ namespace Hy.Modeller
             }
         }
 
-        public void RegisterPackages(IEnumerable<Package> packages)
-        {
-            foreach (var item in packages)
-            {
-                RegisterPackage(item);
-            }
-        }
+        bool ISettings.PackagesInitialised() => Context.Packages.Any();
 
-        public bool PackagesInitialised() => Context.Packages.Any();
+        public IGeneratorConfiguration Context { get; }
 
-        public IGeneratorConfiguration Context { get; } 
+        bool ISettings.SupportRegen { get; set; } = true;
+
+        string ISettings.LocalFolder { get; set; }
+
+        string ISettings.OutputPath { get; set; }
+
+        string ISettings.ServerFolder { get; set; }
+
+        string ISettings.SourceModel { get; set; }
+
+        string ISettings.Target { get; set; }
+
+        string ISettings.Version { get; set; }
     }
 }

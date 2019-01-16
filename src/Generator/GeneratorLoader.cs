@@ -1,4 +1,5 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Base.Models;
+using Hy.Modeller.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +11,7 @@ namespace Hy.Modeller.Generator
     {
         private class TempGeneratorDetail : IMetadata
         {
-            public TempGeneratorDetail(string name, string description, Type entryPoint, IEnumerable<Type> subGenerators, Version version)
+            public TempGeneratorDetail(string name, string description, Type entryPoint, IEnumerable<Type> subGenerators, GeneratorVersion version)
             {
                 Name = name;
                 Description = description;
@@ -18,13 +19,13 @@ namespace Hy.Modeller.Generator
                 SubGenerators = subGenerators;
                 Version = version;
             }
-            public Version Version { get; }
             public string Name { get; }
             public string Description { get; }
             public Type EntryPoint { get; }
             public IEnumerable<Type> SubGenerators { get; }
             public bool IsAlphaRelease { get; }
             public bool IsBetaRelease { get; }
+            public GeneratorVersion Version { get; }
         }
 
         private IEnumerable<GeneratorItem> Process(string filePath)
@@ -82,7 +83,7 @@ namespace Hy.Modeller.Generator
                         var description = type.GetProperty("Description")?.GetValue(obj).ToString();
                         var entryPoint = type.GetProperty("EntryPoint")?.GetValue(obj) as Type;
                         var subGenerators = type.GetProperty("SubGenerators")?.GetValue(obj) as IEnumerable<Type>;
-                        var version = type.GetProperty("Version")?.GetValue(obj) as Version;
+                        var version = type.GetProperty("Version")?.GetValue(obj) as GeneratorVersion;
 
                         if (string.IsNullOrEmpty(name) || entryPoint == null)
                             continue;

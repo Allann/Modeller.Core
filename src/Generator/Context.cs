@@ -1,4 +1,5 @@
 ﻿using FluentValidation.Results;
+using Hy.Modeller.Base.Models;
 using Hy.Modeller.Core.Validators;
 using Hy.Modeller.Interfaces;
 using Hy.Modeller.Models;
@@ -29,7 +30,7 @@ namespace Hy.Modeller.Generator
 
         public ISettings Settings { get; set; }
 
-        public Version Version { get; set; }
+        public GeneratorVersion Version { get; set; }
 
         public Model Model { get; set; }
 
