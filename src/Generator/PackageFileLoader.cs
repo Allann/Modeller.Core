@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Hy.Modeller.Generator
 {
-    internal class PackageFileLoader : IPackageFileLoader
+    public class PackageFileLoader : IPackageFileLoader
     {
         public IEnumerable<Package> Load(string filePath)
         {

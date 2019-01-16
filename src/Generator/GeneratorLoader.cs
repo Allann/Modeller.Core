@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Hy.Modeller.Generator
 {
-    internal class GeneratorLoader : IGeneratorLoader
+    public class GeneratorLoader : IGeneratorLoader
     {
         private class TempGeneratorDetail : IMetadata
         {

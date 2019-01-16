@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Hy.Modeller.Generator
 {
-    internal class JsonSettingsLoader : ISettingsLoader
+    public class JsonSettingsLoader : ISettingsLoader
     {
         public ISettings Load<T>(string filePath)
             where T : ISettings

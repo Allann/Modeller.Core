@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Hy.Modeller.Generator
 {
-    internal class JsonModuleLoader : IModuleLoader
+    public class JsonModuleLoader : IModuleLoader
     {
         private Models.Module Process(string filePath)
         {
