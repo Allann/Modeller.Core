@@ -25,9 +25,9 @@
 
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.5.16" />
-    <PackageReference Include="Hy.Modeller.Base" Version="2.0.6-alpha" />
+    <PackageReference Include="Hy.Modeller.Base" Version="2.0.0" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="0.2.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
