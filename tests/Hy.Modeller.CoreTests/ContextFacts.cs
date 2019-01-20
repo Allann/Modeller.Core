@@ -1,11 +1,9 @@
 ﻿using FluentAssertions;
 using Hy.Modeller.Generator;
-using Hy.Modeller.Interfaces;
-using Moq;
-using Xunit;
 
 namespace Hy.Modeller.CoreTests
 {
+
     public class ContextFacts
     {
         //[Fact]

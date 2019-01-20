@@ -1,44 +1,53 @@
-﻿using Hy.Modeller.Core.Outputs;
-using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Interfaces;
 using System;
+using System.Linq;
 
 namespace Hy.Modeller.Outputs
 {
-    internal class CreateSnippet
+    public class CreateSnippet : IFileCreator
     {
-        private readonly IFileWriter _writer;
-        private readonly IFileCreator _fileCreator;
-        private readonly ISnippet _snippet;
-        private readonly Action<string> _output;
+        private readonly IFileWriter _fileWriter;
 
-        public CreateSnippet(IFileWriter writer, IFileCreator filecreator, ISnippet snippet, Action<string> output = null)
+        public CreateSnippet(IFileWriter fileWriter)
         {
-            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
-            _fileCreator = filecreator ?? throw new ArgumentNullException(nameof(filecreator));
-            _snippet = snippet ?? throw new ArgumentNullException(nameof(snippet));
-            _output = output;
+            _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
         }
 
-        public void Create(string basePath)
-        {
-            var outputPath = basePath;
+        public Type SupportedType => typeof(ISnippet);
 
-            string filename;
-            if (string.IsNullOrWhiteSpace(_snippet.Name))
+        public void Create(IOutput output, IGeneratorConfiguration generatorConfiguration)
+        {
+            var basePath = generatorConfiguration.OutputPath;
+            if (!(output is ISnippet snippet))
+                throw new NotSupportedException($"CreateSnippet only supports {SupportedType.FullName} output types.");
+
+            var filename = snippet.Name ?? "MySnippet";
+            var files = System.IO.Directory.GetFiles(basePath, filename + "*.txt");
+            if (files.Any())
             {
-                filename = System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetTempFileName());
+                var max = 1;
+                foreach (var file in files)
+                {
+                    var name = System.IO.Path.GetFileNameWithoutExtension(file).Substring(filename.Length);
+                    if (int.TryParse(name, out var number))
+                    {
+                        max = Math.Max(max, number);
+                    }
+                }
+                filename += max.ToString();
             }
-            else
-                filename = _snippet.Name;
+
             var ext = System.IO.Path.GetExtension(filename);
             if (string.IsNullOrEmpty(ext) || ext != ".txt")
                 filename += ".txt";
 
-            var f = _fileCreator.Create(_snippet);
-            f.Path = System.IO.Path.Combine(outputPath, "Snippets");
-
-            var fileOutput = new CreateFile(_writer, f, _output);
-            fileOutput.Create(basePath);
+            var fileToOutput = new File()
+            {
+                Content = snippet.Content,
+                CanOverwrite = true,
+                Name = filename
+            };
+            _fileWriter.Write(fileToOutput);
         }
     }
 }

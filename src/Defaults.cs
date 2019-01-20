@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hy.Modeller.Base.Models;
+using System;
 using System.IO;
 
 namespace Hy.Modeller
@@ -13,6 +14,6 @@ namespace Hy.Modeller
 
         public static string Target => Targets.Shared.Default;
 
-        public static Version Version => new Version();
+        public static GeneratorVersion Version => new GeneratorVersion();
     }
 }

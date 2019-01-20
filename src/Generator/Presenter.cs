@@ -1,87 +1,82 @@
-﻿using System;
+﻿using Hy.Modeller.Base.Models;
+using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Hy.Modeller.Generator
 {
-    public class Presenter
+    public class Presenter : IPresenter
     {
-        private readonly Action<string, bool> _output;
+        private readonly IGeneratorLoader _generatorLoader;
+        private readonly ILogger<IPresenter> _logger;
 
-        public Presenter(string folder, string target, Action<string, bool> output)
+        public Presenter(IGeneratorConfiguration generatorConfiguration, IGeneratorLoader generatorLoader, ILogger<IPresenter> logger)
         {
-            _output = output ?? throw new ArgumentNullException(nameof(output));
-            if (string.IsNullOrWhiteSpace(folder))
-            {
-                folder = Defaults.LocalFolder;
-            }
-            Folder = folder;
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                target = Defaults.Target;
-            }
-            Target = target;
+            GeneratorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
+            _generatorLoader = generatorLoader ?? throw new ArgumentNullException(nameof(generatorLoader));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public string Folder { get; }
-        public string Target { get; }
+        public IGeneratorConfiguration GeneratorConfiguration { get; }
 
-        private IEnumerable<IEnumerable<string>> Process(string folder, bool verbose)
+        public void Display()
         {
-            var rows = new List<List<string>>();
+            var folder = System.IO.Path.Combine(GeneratorConfiguration.LocalFolder, GeneratorConfiguration.Target);
+            _logger.LogInformation("Available generators");
+            _logger.LogInformation($"  location: {folder}");
 
-            //var generators = FileHelper.GetAvailableGenerators(folder);
-            //foreach (var generator in generators)
-            //{
-            //    var abbr = FileHelper.GetAbbreviatedFilename(generator.FilePath);
-            //    var m = generator.Metadata;
-            //    if (verbose)
-            //    {
-            //        rows.Add(new List<string> { abbr, m.Name, m.Version.ToString(), m.Description });
-            //    }
-            //    else
-            //    {
-            //        rows.Add(new List<string> { abbr, m.Name, m.Version.ToString() });
-            //    }
-            //}
-
-            //if (rows.Any())
-            //{
-            //    var cols = verbose ? 3 : 2;
-            //    var widths = new List<int>(cols);
-            //    for (var col = 0; col < cols; col++)
-            //    {
-            //        widths.Add(rows.Max(l => l[col].Length));
-            //    }
-            //    foreach (var row in rows)
-            //    {
-            //        for (var col = 0; col < cols; col++)
-            //        {
-            //            row[col] = row[col].PadRight(widths[col]) + " | ";
-            //        }
-            //    }
-            //}
-
-            return rows;
-        }
-
-        public void Display(bool verbose = false)
-        {
-            var folder = System.IO.Path.Combine(Folder, Target);
-            _output?.Invoke("Available generators", true);
-            _output?.Invoke($"  location: {folder}", true);
-
-            var table = Process(folder, verbose);
+            var table = Process(folder);
+            var sb = new StringBuilder();
+            sb.AppendLine();
             foreach (var row in table)
             {
                 foreach (var cell in row)
-                {
-                    _output?.Invoke(cell, false);
-                }
-                _output?.Invoke("", true);
+                    sb.Append(cell);
+                sb.AppendLine();
             }
+            _logger.LogInformation(sb.ToString());
         }
 
+        private IEnumerable<IEnumerable<string>> Process(string folder)
+        {
+            var rows = new List<List<string>>();
+
+            if (!_generatorLoader.TryLoad(folder, out var generators))
+                return rows;
+
+            foreach (var generator in generators)
+            {
+                var abbr = FileHelper.GetAbbreviatedFilename(generator.FilePath);
+                var m = generator.Metadata;
+                var vers = m.Version == null ? new GeneratorVersion().ToString() : m.Version.ToString();
+                if (GeneratorConfiguration.Verbose)
+                {
+                    rows.Add(new List<string> { abbr.filename, m.Name, vers, m.Description });
+                    foreach (var item in generator.Metadata.SubGenerators)
+                        rows.Add(new List<string> { "", item.Name });
+                }
+                else
+                    rows.Add(new List<string> { abbr.filename, m.Name, vers });
+            }
+
+            if (rows.Any())
+            {
+                var cols = GeneratorConfiguration.Verbose ? 3 : 2;
+                var widths = new List<int>(cols);
+                for (var col = 0; col < cols; col++)
+                    widths.Add(rows.Max(l => l[col].Length));
+
+                foreach (var row in rows)
+                {
+                    for (var col = 0; col < cols; col++)
+                        row[col] = row[col].PadRight(widths[col]) + " | ";
+                }
+            }
+
+            return rows;
+        }
     }
 }

@@ -8,9 +8,9 @@ namespace Hy.Modeller.Core.Validators
     {
         public GeneratorConfigurationValidator()
         {
-            RuleFor(x => x.SourceModel).NotNull().NotEmpty();
+            RuleFor(x => x.SourceModel).Cascade(CascadeMode.StopOnFirstFailure).NotNull().NotEmpty();
             RuleFor(x => x.LocalFolder).Must(x => Directory.Exists(x)).WithMessage(m => $"Local folder not found '{m.LocalFolder}'");
-            RuleFor(x => x.GeneratorName).NotNull().NotEmpty();
+            RuleFor(x => x.GeneratorName).Cascade(CascadeMode.StopOnFirstFailure).NotNull().NotEmpty();
             
 
         }

@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Hy.Modeller
 {
-    public class GeneratorItem
+    public class GeneratorItem : IGeneratorItem
     {
         private IGenerator _instance;
 
@@ -21,7 +21,9 @@ namespace Hy.Modeller
                 throw new FileNotFoundException("Generator not found.", filePath);
             }
             FilePath = filePath;
-            AbbreviatedFileName = FileHelper.GetAbbreviatedFilename(filePath);
+            var result = FileHelper.GetAbbreviatedFilename(filePath);
+            AbbreviatedFileName = result.filename;
+
         }
 
         public string AbbreviatedFileName { get; }

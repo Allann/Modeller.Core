@@ -3,38 +3,36 @@ using System;
 
 namespace Hy.Modeller.Outputs
 {
-    internal class CreateSolution
+    public class CreateSolution : IFileCreator
     {
         private readonly IFileWriter _fileWriter;
-        private readonly ISolution _solution;
-        private readonly Action<string> _output;
 
-        public CreateSolution(IFileWriter fileWriter, ISolution solution, Action<string> output)
+        public CreateSolution(IFileWriter fileWriter)
         {
             _fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
-            _solution = solution ?? throw new ArgumentNullException(nameof(solution));
-            _output = output;
         }
 
-        internal void Create(string basePath)
+        public Type SupportedType => typeof(ISolution);
+
+        public void Create(IOutput output, IGeneratorConfiguration generatorConfiguration)
         {
-            if (!System.IO.Path.IsPathRooted(_solution.Directory))
-                _solution.Directory = System.IO.Path.Combine(basePath, _solution.Directory);
+            if (!(output is ISolution solution))
+                throw new NotSupportedException($"{nameof(CreateSolution)} only supports {SupportedType.FullName} output types.");
 
-            _output?.Invoke($"Project: {_solution.Name}");
+            if (!System.IO.Path.IsPathRooted(solution.Directory))
+                solution.Directory = System.IO.Path.Combine(generatorConfiguration.OutputPath, solution.Directory);
 
-            foreach (var file in _solution.Files)
+            foreach (var file in solution.Files)
             {
-                var fileOutput = new CreateFile(_fileWriter, file, _output);
-                fileOutput.Create(_solution.Directory);
+                var fileOutput = new CreateFile(_fileWriter);
+                fileOutput.Create(file, generatorConfiguration);
             }
 
-            foreach (var project in _solution.Projects)
+            foreach (var project in solution.Projects)
             {
-                var projectOutput = new CreateProject(_fileWriter, project, _output);
-                projectOutput.Create(_solution.Directory);
+                var projectOutput = new CreateProject(_fileWriter);
+                projectOutput.Create(project, generatorConfiguration);
             }
         }
     }
-
 }

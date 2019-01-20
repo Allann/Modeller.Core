@@ -1,48 +1,44 @@
 ﻿using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
 using Modeller;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 
 namespace Hy.Modeller.Generator
 {
-    public class PackageService
+    public class PackageService : IPackageService
     {
         private readonly IPackageFileLoader _loader;
-        private string _target;
-        private readonly IDictionary<string, IEnumerable<Package>> _items = new Dictionary<string, IEnumerable<Package>>();
-        private string _folder;
-        private string _defaultFolder;
+        private readonly ILogger<IPackageService> _logger;
+        private readonly List<Package> _items = new List<Package>();
 
-        public PackageService(IPackageFileLoader loader)
+        public PackageService(IPackageFileLoader loader, ILogger<IPackageService> logger)
         {
             _loader = loader ?? throw new ArgumentNullException(nameof(loader));
-            _defaultFolder = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().Location).LocalPath);
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public string Target
-        {
-            get => string.IsNullOrWhiteSpace(_target) ? Defaults.Target : _target;
-            set => _target = value;
-        }
+        private string Target { get; set; }
+        private string TargetFile { get; set; }
 
-        public string Folder
+        public void Refresh(IContext context)
         {
-            get => string.IsNullOrWhiteSpace(_folder)  ? _defaultFolder : _folder;
-            set => _folder = value;
-        }
-
-        public void Refresh()
-        {
-            var d = new DirectoryInfo(Folder);
+            _items.Clear();
+            Target = context?.GeneratorConfiguration?.Target;
+            if (Target == null)
+                return;
+            var d = new DirectoryInfo(context.TargetFolder);
             if (!d.Exists) return;
 
-            var path = Path.Combine(d.FullName, Target + ".json");
-            if (_loader.TryLoad(path, out var packages))
+            TargetFile = Path.Combine(d.FullName, Target + ".json");
+            _logger.LogInformation($"Using Package file: {TargetFile}");
+
+            if (_loader.TryLoad(TargetFile, out var packages))
             {
-                if (!_items.ContainsKey(Target))
-                    _items.Add(Target, packages);
+                _items.AddRange(packages);
             }
         }
 
@@ -50,14 +46,9 @@ namespace Hy.Modeller.Generator
         {
             get
             {
-                if (!_items.ContainsKey(Target))
-                    Refresh();
-                if (!_items.ContainsKey(Target))
-                {
-                    var path = Path.Combine(Folder, Target + ".json");
-                    throw new MissingTargetException(Target, $"Missing target file {path}");
-                }
-                return _items[Target];
+                if (!_items.Any())
+                    throw new MissingTargetException(Target, $"Missing target file {TargetFile}");
+                return new ReadOnlyCollection<Package>(_items);
             }
         }
     }

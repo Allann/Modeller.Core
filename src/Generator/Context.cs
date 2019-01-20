@@ -13,26 +13,30 @@ namespace Hy.Modeller.Generator
         private readonly ISettingsLoader _settingsLoader;
         private readonly IModuleLoader _moduleLoader;
         private readonly IGeneratorLoader _generatorLoader;
+        private readonly IPackageService _packageService;
 
-        public Context(IGeneratorConfiguration generatorConfiguration, ISettingsLoader settingsLoader, IModuleLoader moduleLoader, IGeneratorLoader generatorLoader)
+        public Context(IGeneratorConfiguration generatorConfiguration, 
+            ISettingsLoader settingsLoader, 
+            IModuleLoader moduleLoader, 
+            IGeneratorLoader generatorLoader,
+            IPackageService packageService)
         {
             GeneratorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
             _settingsLoader = settingsLoader ?? throw new ArgumentNullException(nameof(settingsLoader));
             _moduleLoader = moduleLoader ?? throw new ArgumentNullException(nameof(moduleLoader));
             _generatorLoader = generatorLoader ?? throw new ArgumentNullException(nameof(generatorLoader));
-
-            ProcessConfiguration();
+            _packageService = packageService ?? throw new ArgumentNullException(nameof(packageService));
         }
 
-        public GeneratorItem Generator { get; set; }
+        public IGeneratorItem Generator { get; private set; }
 
-        public Module Module { get; set; }
+        public Module Module { get; private set; }
 
-        public ISettings Settings { get; set; }
+        public ISettings Settings { get; private set; }
 
-        public GeneratorVersion Version { get; set; }
+        public GeneratorVersion Version { get; private set; } = new GeneratorVersion();
 
-        public Model Model { get; set; }
+        public Model Model { get; private set; }
 
         public string TargetFolder => !string.IsNullOrWhiteSpace(GeneratorConfiguration.LocalFolder) && !string.IsNullOrWhiteSpace(GeneratorConfiguration.Target) ? System.IO.Path.Combine(GeneratorConfiguration.LocalFolder, GeneratorConfiguration.Target) : null;
 
@@ -53,22 +57,20 @@ namespace Hy.Modeller.Generator
 
             if (!string.IsNullOrEmpty(GeneratorConfiguration.SettingsFile))
                 Settings = _settingsLoader.Load<ISettings>(GeneratorConfiguration.SettingsFile);
+            if (Settings==null)
+                Settings = new Settings(GeneratorConfiguration);
+
+            if (Settings != null && !Settings.PackagesInitialised())
+            {
+                _packageService.Refresh(this);
+                Settings.RegisterPackages(_packageService.Items);
+            }
 
             if (!string.IsNullOrEmpty(GeneratorConfiguration.SourceModel))
                 Module = _moduleLoader.Load(GeneratorConfiguration.SourceModel);
 
             var configValidator = new ContextValidator();
             return configValidator.Validate(this);
-        }
-
-        internal void SetSettings(ISettings settings)
-        {
-            Settings = settings;
-            if (Settings != null && !Settings.PackagesInitialised())
-            {
-                var ps = new PackageService(new PackageFileLoader());
-                Settings.RegisterPackages(ps.Items);
-            }
         }
     }
 }

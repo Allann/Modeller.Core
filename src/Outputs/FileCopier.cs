@@ -1,41 +1,46 @@
 ﻿using System;
 using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Hy.Modeller.Outputs
 {
-    internal class FileCopier
+    public class FileCopier : IFileCreator
     {
-        private readonly IFileCopy _fc;
-        private readonly bool _overwrite;
-        private readonly Action<string> _output;
+        private readonly ILogger<IFileCreator> _logger;
 
-        public FileCopier(IFileCopy fc, bool overwrite, Action<string> output)
+        public FileCopier(ILogger<IFileCreator> logger)
         {
-            _fc = fc ?? throw new ArgumentNullException(nameof(fc));
-            _overwrite = overwrite;
-            _output = output;
+            _logger = logger;
         }
 
-        internal void Copy(string basePath)
+        public Type SupportedType => typeof(IFileCopy);
+
+        public void Create(IOutput output, IGeneratorConfiguration generatorConfiguration) 
         {
-            if (!System.IO.Path.IsPathRooted(_fc.Destination))
+            if (!(output is IFileCopy fileCopy))
+                throw new NotSupportedException($"{nameof(CreateFile)} only supports {SupportedType.FullName} output types.");
+
+            var basePath = generatorConfiguration.OutputPath;
+            var overwrite = generatorConfiguration.Overwrite;
+
+            if (!System.IO.Path.IsPathRooted(fileCopy.Destination))
             {
-                _fc.Destination = !string.IsNullOrWhiteSpace(_fc.Destination) ? System.IO.Path.Combine(basePath, _fc.Destination) : basePath;
+                fileCopy.Destination = !string.IsNullOrWhiteSpace(fileCopy.Destination) ? System.IO.Path.Combine(basePath, fileCopy.Destination) : basePath;
             }
 
             try
             {
-                if (!_overwrite && System.IO.File.Exists(_fc.Destination))
-                    _output.Invoke($"Copy: {_fc.Source} skipped.");
+                if (!overwrite && System.IO.File.Exists(fileCopy.Destination))
+                    _logger.LogInformation($"Copy: {fileCopy.Source} skipped.");
                 else
                 {
-                    System.IO.File.Copy(_fc.Source, _fc.Destination, _overwrite);
-                    _output.Invoke($"Copy: {_fc.Source} -> {_fc.Destination} - success");
+                    System.IO.File.Copy(fileCopy.Source, fileCopy.Destination, overwrite);
+                    _logger.LogInformation($"Copy: {fileCopy.Source} -> {fileCopy.Destination} - success");
                 }
             }
             catch (Exception ex)
             {
-                _output.Invoke($"Copy: {_fc.Source} -> {_fc.Destination} - failed. {ex.Message}");
+                _logger.LogError(ex, $"Copy: {fileCopy.Source} -> {fileCopy.Destination} - failed.");
             }
         }
     }

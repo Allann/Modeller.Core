@@ -1,4 +1,5 @@
-﻿using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Base.Models;
+using Hy.Modeller.Interfaces;
 using System.Collections.Generic;
 
 namespace Hy.Modeller
@@ -20,7 +21,7 @@ namespace Hy.Modeller
 
         public string GeneratorName { get; set; }
 
-        public string Version { get; set; }
+        public GeneratorVersion Version { get; set; }
 
         public string LocalFolder
         {
@@ -35,6 +36,8 @@ namespace Hy.Modeller
         public string ModelName { get; set; }
 
         public string SettingsFile { get; set; }
+
+        public bool Overwrite { get; set; }
 
         public List<Package> Packages { get; set; } = new List<Package>();
     }

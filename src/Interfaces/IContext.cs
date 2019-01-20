@@ -1,4 +1,5 @@
-﻿using Hy.Modeller.Base.Models;
+﻿using FluentValidation.Results;
+using Hy.Modeller.Base.Models;
 using Hy.Modeller.Models;
 
 namespace Hy.Modeller.Interfaces
@@ -6,11 +7,13 @@ namespace Hy.Modeller.Interfaces
     public interface IContext
     {
         IGeneratorConfiguration GeneratorConfiguration { get; }
-        GeneratorItem Generator { get; set; }
-        Model Model { get; set; }
-        Module Module { get; set; }
-        ISettings Settings { get; set; }
-        GeneratorVersion Version { get; set; }
+        IGeneratorItem Generator { get; }
+        Model Model { get; }
+        Module Module { get;  }
+        ISettings Settings { get; }
+        GeneratorVersion Version { get; }
         string TargetFolder { get; }
+
+        ValidationResult ProcessConfiguration();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Hy.Modeller.GeneratorBase;
 using Hy.Modeller.Interfaces;
+using Hy.Modeller.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,8 +18,16 @@ namespace Hy.Modeller.CoreTests.TestGenenerators
 
     public class SimpleTestGenerator : IGenerator
     {
-        ISettings IGenerator.Settings { get; }
+        private readonly Module _module;
 
-        IOutput IGenerator.Create() => new Outputs.Snippet("Snippet Conent");
+        public SimpleTestGenerator(ISettings settings, Module module )
+        {
+            Settings = settings;
+            _module = module;
+        }
+
+        public ISettings Settings { get; }
+
+        IOutput IGenerator.Create() => new Outputs.Snippet($"Snippet Content for {_module.Project}");
     }
 }

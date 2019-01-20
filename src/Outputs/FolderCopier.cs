@@ -1,38 +1,43 @@
 ﻿using System;
 using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Hy.Modeller.Outputs
 {
-    internal class FolderCopier
+    public class FolderCopier : IFileCreator
     {
-        private readonly IFolderCopy _fc;
-        private readonly bool _overwrite;
-        private readonly Action<string> _output;
+        private readonly ILogger<IFileCreator> _logger;
 
-        public FolderCopier(IFolderCopy fc, bool overwrite, Action<string> output)
+        public FolderCopier(ILogger<IFileCreator> logger)
         {
-            _fc = fc ?? throw new ArgumentNullException(nameof(fc));
-            _overwrite = overwrite;
-            _output = output;
+            _logger = logger;
         }
 
-        internal void Copy(string basePath)
+        public Type SupportedType => typeof(IFolderCopy);
+
+        public void Create(IOutput output, IGeneratorConfiguration generatorConfiguration) 
         {
-            if (!System.IO.Path.IsPathRooted(_fc.Destination))
+            if (!(output is IFolderCopy folderCopy))
+                throw new NotSupportedException($"{nameof(CreateFile)} only supports {SupportedType.FullName} output types.");
+
+            var basePath = generatorConfiguration.OutputPath;
+            var overwrite = generatorConfiguration.Overwrite;
+
+            if (!System.IO.Path.IsPathRooted(folderCopy.Destination))
             {
-                _fc.SetPath(!string.IsNullOrWhiteSpace(_fc.Destination) ? System.IO.Path.Combine(basePath, _fc.Destination) : basePath);
+                folderCopy.SetPath(!string.IsNullOrWhiteSpace(folderCopy.Destination) ? System.IO.Path.Combine(basePath, folderCopy.Destination) : basePath);
             }
 
             try
             {
-                var s = new System.IO.DirectoryInfo(_fc.Source);
+                var s = new System.IO.DirectoryInfo(folderCopy.Source);
                 if (!s.Exists)
                     return;
 
-                var d = new System.IO.DirectoryInfo(_fc.Destination);
-                if (!_overwrite && d.Exists)
+                var d = new System.IO.DirectoryInfo(folderCopy.Destination);
+                if (!overwrite && d.Exists)
                 {
-                    _output.Invoke($"Copy: {_fc.Source} skipped.");
+                    _logger.LogInformation($"Copy: {folderCopy.Source} skipped.");
                 }
                 else
                 {
@@ -40,14 +45,14 @@ namespace Hy.Modeller.Outputs
                         d.Create();
                     foreach (var file in s.GetFiles())
                     {
-                        file.CopyTo(System.IO.Path.Combine(d.FullName, file.Name), _overwrite);
+                        file.CopyTo(System.IO.Path.Combine(d.FullName, file.Name), overwrite);
                     }
-                    _output.Invoke($"Copy: {_fc.Source} -> {_fc.Destination} - success");
+                    _logger.LogInformation($"Copy: {folderCopy.Source} -> {folderCopy.Destination} - success");
                 }
             }
             catch (Exception ex)
             {
-                _output.Invoke($"Copy: {_fc.Source} -> {_fc.Destination} - failed. {ex.Message}");
+                _logger.LogError(ex,$"Copy: {folderCopy.Source} -> {folderCopy.Destination} - failed.");
             }
         }
     }

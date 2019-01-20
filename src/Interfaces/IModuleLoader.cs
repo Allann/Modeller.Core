@@ -1,5 +1,4 @@
 ﻿using Hy.Modeller.Models;
-using System.Collections.Generic;
 
 namespace Hy.Modeller.Interfaces
 {
@@ -7,11 +6,5 @@ namespace Hy.Modeller.Interfaces
     {
         Module Load(string filePath);
         bool TryLoad(string filePath, out Module module);
-    }
-
-    public interface IGeneratorLoader
-    {
-        IEnumerable<GeneratorItem> Load(string filePath);
-        bool TryLoad(string filePath, out IEnumerable<GeneratorItem> generators);
     }
 }

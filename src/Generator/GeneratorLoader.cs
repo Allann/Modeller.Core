@@ -17,7 +17,7 @@ namespace Hy.Modeller.Generator
                 Description = description;
                 EntryPoint = entryPoint;
                 SubGenerators = subGenerators;
-                Version = version;
+                Version = version ?? new GeneratorVersion();
             }
             public string Name { get; }
             public string Description { get; }

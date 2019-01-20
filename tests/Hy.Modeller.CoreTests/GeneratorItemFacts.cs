@@ -22,9 +22,12 @@ namespace Hy.Modeller.CoreTests
             var thisTestFilePath = GetThisFilePath();
 
             var meta = new Mock<IMetadata>();
+            var settings = new Mock<ISettings>();
+            var module = new Models.Module();
+
             var sut = new GeneratorItem(meta.Object, thisTestFilePath, typeof(SimpleTestGenerator));
 
-            sut.Instance().Should().NotBeNull();
+            sut.Instance(settings.Object, module).Should().NotBeNull();
         }
 
         [Theory]

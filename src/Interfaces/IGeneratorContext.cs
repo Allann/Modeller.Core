@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Hy.Modeller.Base.Models;
+using System.Collections.Generic;
 
 namespace Hy.Modeller.Interfaces
 {
@@ -14,6 +15,7 @@ namespace Hy.Modeller.Interfaces
         string SourceModel { get; set; }
         string Target { get; set; }
         bool Verbose { get; set; }
-        string Version { get; set; }
+        GeneratorVersion Version { get; set; }
+        bool Overwrite { get; set; }
     }
 }

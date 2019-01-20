@@ -1,9 +1,6 @@
-﻿using Hy.Modeller.GeneratorBase;
+﻿using Hy.Modeller.Base.Models;
 using Hy.Modeller.Interfaces;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -11,44 +8,33 @@ namespace Hy.Modeller
 {
     public static class FileHelper
     {
-        public static string GetAbbreviatedFilename(string filePath)
+        public static (string filename, GeneratorVersion version) GetAbbreviatedFilename(string filePath)
         {
             if (filePath == null)
-                return null;
+                return (null, new GeneratorVersion());
 
             var filename = Path.GetFileNameWithoutExtension(filePath);
-            var idx = filename.IndexOf('.');
-            if (idx > -1)
+            var parts = filename.Split('.');
+            if (parts.Any())
             {
-                filename = filename.Substring(0, idx);
-            }
-            return filename;
-        }
+                var f = string.Empty;
+                var v = string.Empty;
+                int part;
+                for (var i = 0; i < parts.Length; i++)
+                {
+                    if (parts[i].StartsWith("v") && int.TryParse(parts[i].Substring(1), out var number1))
+                        v += number1.ToString() + ".";
+                    else if (int.TryParse(parts[i], out var number2))
+                        v += number2.ToString() + ".";
+                    else
+                        f += parts[i] + ".";
+                }
 
-        public static void Write(this IFile file, bool overwrite = false)
-        {
-            var dir = new DirectoryInfo(file.Path);
-            var filename = Path.Combine(dir.FullName, file.Name);
-            if (!dir.Exists)
-            {
-                Directory.CreateDirectory(dir.FullName);
-                File.WriteAllText(filename, file.Content);
+                var fn = string.IsNullOrEmpty(f) ? string.Empty : f.Substring(0, f.Length - 1);
+                var ve = string.IsNullOrEmpty(v) ? null : new GeneratorVersion(v.Substring(0, v.Length - 1));
+                return (fn, ve);
             }
-            else
-            {
-                var existing = new FileInfo(filename);
-                if (existing.Exists)
-                {
-                    if (overwrite)
-                    {
-                        File.WriteAllText(filename, file.Content);
-                    }
-                }
-                else
-                {
-                    File.WriteAllText(filename, file.Content);
-                }
-            }
+            return (filename, new GeneratorVersion());
         }
 
         public static bool UpdateLocalGenerators(string serverFolder = null, string localFolder = null, bool overwrite = false, Action<string> output = null)

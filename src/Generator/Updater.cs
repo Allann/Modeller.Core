@@ -1,72 +1,53 @@
-﻿using System;
+﻿using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 
 namespace Hy.Modeller.Generator
 {
-    public class Updater
+    public class Updater : IUpdater
     {
-        private readonly Action<string> _output;
+        private readonly IGeneratorConfiguration _generatorConfiguration;
+        private readonly ILogger<IUpdater> _logger;
         private int _affected;
 
-        public Updater(string server = null, string local = null, string target = null, bool overwrite = false, Action<string> output = null, bool verbose = false)
+        IGeneratorConfiguration IUpdater.GeneratorConfiguration => _generatorConfiguration;
+
+        public Updater(IGeneratorConfiguration generatorConfiguration, ILogger<IUpdater> logger)
         {
-            if (string.IsNullOrWhiteSpace(local))
-            {
-                local = Defaults.LocalFolder;
-            }
-            LocalFolder = local;
-
-            if (string.IsNullOrWhiteSpace(server))
-            {
-                server = Defaults.ServerFolder;
-            }
-            ServerFolder = server;
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                target = Defaults.Target;
-            }
-            Target = target;
-            Overwrite = overwrite;
-            _output = output;
-            Verbose = verbose;
+            _generatorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public string LocalFolder { get; }
-        public string ServerFolder { get; }
-        public string Target { get; }
-        public bool Overwrite { get; }
-        public bool Verbose { get; }
-
-        public void Refresh()
+        void IUpdater.Refresh() 
         {
             _affected = 0;
-            _output?.Invoke($"Updating generator files for target: {Target}");
-            _output?.Invoke($"Server Folder: {ServerFolder}");
-            _output?.Invoke($"Local Folder: {LocalFolder}");
-            _output?.Invoke($"Overwrite: {Overwrite}");
+            _logger.LogInformation($"Updating generator files for target: {_generatorConfiguration.Target}");
+            _logger.LogInformation($"Server Folder: {_generatorConfiguration.ServerFolder}");
+            _logger.LogInformation($"Local Folder: {_generatorConfiguration.LocalFolder}");
+            _logger.LogInformation($"Overwrite: {_generatorConfiguration.Overwrite}");
 
-            var server = Path.Combine(ServerFolder + "", Target);
-            var local = Path.Combine(LocalFolder + "", Target);
+            var server = Path.Combine(_generatorConfiguration.ServerFolder + "", _generatorConfiguration.Target);
+            var local = Path.Combine(_generatorConfiguration.LocalFolder + "", _generatorConfiguration.Target);
 
             if (UpdateLocalGenerators())
             {
-                _output?.Invoke($"Update completed successfully. Files affected: {_affected}");
+                _logger.LogInformation($"Update completed successfully. Files affected: {_affected}");
             }
             else
             {
-                _output?.Invoke($"Update failed. Files affected: {_affected}");
+                _logger.LogInformation($"Update failed. Files affected: {_affected}");
             }
         }
 
         private bool UpdateLocalGenerators()
         {
-            var server = new DirectoryInfo(ServerFolder);
-            var local = new DirectoryInfo(LocalFolder);
+            var server = new DirectoryInfo(_generatorConfiguration.ServerFolder);
+            var local = new DirectoryInfo(_generatorConfiguration.LocalFolder);
 
             if (!server.Exists)
             {
-                _output?.Invoke($"Server Folder '{server.FullName}' not found.");
+                _logger.LogWarning($"Server Folder '{server.FullName}' not found.");
                 return false;
             }
 
@@ -85,8 +66,8 @@ namespace Hy.Modeller.Generator
             // If the destination directory doesn't exist, create it.
             if (!destDirName.Exists)
             {
-                if (Verbose)
-                    _output?.Invoke($"creating {destDirName.FullName}");
+                if (_generatorConfiguration.Verbose)
+                    _logger.LogInformation($"creating {destDirName.FullName}");
                 destDirName.Create();
             }
 
@@ -95,16 +76,16 @@ namespace Hy.Modeller.Generator
             foreach (var file in files)
             {
                 var temppath = Path.Combine(destDirName.FullName, file.Name);
-                if (File.Exists(temppath) && !Overwrite)
+                if (File.Exists(temppath) && !_generatorConfiguration.Overwrite)
                 {
-                    if (Verbose)
-                        _output?.Invoke($"skipping {file.Name}");
+                    if (_generatorConfiguration.Verbose)
+                        _logger.LogInformation($"skipping {file.Name}");
                     continue;
                 }
 
-                if (Verbose)
-                    _output?.Invoke($"copying {file.Name} to {destDirName.Name}");
-                file.CopyTo(temppath, Overwrite);
+                if (_generatorConfiguration.Verbose)
+                    _logger.LogInformation($"copying {file.Name} to {destDirName.Name}");
+                file.CopyTo(temppath, _generatorConfiguration.Overwrite);
                 _affected++;
             }
 

@@ -1,66 +1,64 @@
-﻿using Hy.Modeller.Models;
+﻿using Hy.Modeller.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
 namespace Hy.Modeller.Generator
 {
-    public class CodeGenerator
+    public class CodeGenerator : ICodeGenerator
     {
-        private readonly Context _context;
-        private readonly Action<string> _output;
-        private readonly bool _verbose;
+        private readonly ILogger<ICodeGenerator> _logger;
 
-        public CodeGenerator(Context context, Action<string> output, bool verbose = false)
+        public CodeGenerator(ILogger<ICodeGenerator> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _output = output ?? throw new ArgumentNullException(nameof(output));
-            _verbose = verbose;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public Interfaces.IOutput Create()
+        public IOutput Create(IContext context)
         {
-            if (_context.Module == null || _context.Settings == null || _context.Generator == null)
-                return null;
-
-            if (_verbose)
+            var result = context.ProcessConfiguration();
+            if (!result.IsValid)
             {
-                _output($"Module: {_context.Module.Namespace}");
-                _output($"Supports regen: {_context.Settings.SupportRegen}");
-                _output($"Generator: {_context.Generator.Metadata.Name}");
+                foreach (var item in result.Errors)
+                    _logger.LogError($"{item.ErrorMessage}");
+                return null;
             }
+        
+            _logger.LogInformation($"Module: {context.Module.Namespace}");
+            _logger.LogInformation($"Supports regen: {context.Settings.SupportRegen}");
+            _logger.LogInformation($"Generator: {context.Generator.Metadata.Name}");
 
-            var type = _context.Generator.Metadata.EntryPoint;
+            var type = context.Generator.Metadata.EntryPoint;
             var cis = type.GetConstructors();
             if (cis.Length != 1)
             {
-                _output("Modeller only supports single public constructors for a generator.");
+                _logger.LogError("Modeller only supports single public constructors for a generator.");
                 return null;
             }
             var ci = cis[0];
             var args = new List<object>();
             foreach (var p in ci.GetParameters())
             {
-                if (p.ParameterType == typeof(Interfaces.ISettings))
+                if (p.ParameterType.FullName == "Hy.Modeller.Interfaces.ISettings")
                 {
-                    args.Add(_context.Settings);
+                    args.Add(context.Settings);
                 }
-                else if (p.ParameterType == typeof(Module))
+                else if (p.ParameterType.FullName == "Hy.Modeller.Models.Module")
                 {
-                    args.Add(_context.Module);
+                    args.Add(context.Module);
                 }
-                else if (p.ParameterType == typeof(Model))
+                else if (p.ParameterType.FullName == "Hy.Modeller.Models.Model")
                 {
-                    args.Add(_context.Model);
+                    args.Add(context.Model);
                 }
                 else
                 {
-                    _output($"{p.ParameterType.ToString()} is not a supported argument type on Generator constructors.");
+                    _logger.LogError($"{p.ParameterType.ToString()} is not a supported argument type on Generator constructors.");
                     return null;
                 }
             }
 
-            var generator = ci.Invoke(args.ToArray()) as Interfaces.IGenerator;
-            return generator.Create();
+            return (ci.Invoke(args.ToArray()) as IGenerator).Create();
         }
     }
 }

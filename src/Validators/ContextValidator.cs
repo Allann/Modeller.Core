@@ -13,8 +13,8 @@ namespace Hy.Modeller.Core.Validators
             RuleFor(x => x.Generator).NotNull();
             RuleFor(x => x.Module).NotNull().SetValidator(new ModuleValidator()).When(x => !string.IsNullOrEmpty(x.GeneratorConfiguration.SourceModel));
             RuleFor(x => x.Settings).NotNull().SetValidator(new SettingsValidator()).When(x => !string.IsNullOrEmpty(x.GeneratorConfiguration.SettingsFile));
-
             RuleFor(x => x.GeneratorConfiguration).SetValidator(new GeneratorConfigurationValidator());
+
         }
     }
 
