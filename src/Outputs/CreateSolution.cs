@@ -19,8 +19,11 @@ namespace Hy.Modeller.Outputs
             if (!(output is ISolution solution))
                 throw new NotSupportedException($"{nameof(CreateSolution)} only supports {SupportedType.FullName} output types.");
 
-            if (!System.IO.Path.IsPathRooted(solution.Directory))
-                solution.Directory = System.IO.Path.Combine(generatorConfiguration.OutputPath, solution.Directory);
+            if (!string.IsNullOrWhiteSpace(solution.Directory))
+            {
+                if (!System.IO.Path.IsPathRooted(solution.Directory))
+                    solution.Directory = System.IO.Path.Combine(generatorConfiguration.OutputPath, solution.Directory);
+            }
 
             foreach (var file in solution.Files)
             {
