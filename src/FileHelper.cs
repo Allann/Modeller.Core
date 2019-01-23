@@ -19,7 +19,6 @@ namespace Hy.Modeller
             {
                 var f = string.Empty;
                 var v = string.Empty;
-                int part;
                 for (var i = 0; i < parts.Length; i++)
                 {
                     if (parts[i].StartsWith("v") && int.TryParse(parts[i].Substring(1), out var number1))

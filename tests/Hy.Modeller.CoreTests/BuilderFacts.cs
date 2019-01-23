@@ -83,7 +83,6 @@ namespace Hy.Modeller.CoreTests
             var logger = new Mock<ILogger<IBuilder>>();
 
             var builder = new Builder(context.Object, codeGenerator.Object, outputStrategy.Object, logger.Object);
-
             builder.Create();
 
             codeGenerator.Verify(c => c.Create(It.IsAny<IContext>()), Times.Once);
