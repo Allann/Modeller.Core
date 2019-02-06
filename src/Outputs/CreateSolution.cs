@@ -22,9 +22,12 @@ namespace Hy.Modeller.Outputs
             if (solution.Directory != null && !System.IO.Path.IsPathRooted(solution.Directory))
                 solution.Directory = System.IO.Path.Combine(generatorConfiguration.OutputPath, solution.Directory);
 
-            var s = new System.IO.DirectoryInfo(solution.Directory);
-            if (!s.Exists)
-                s.Create();
+            if (solution.Directory != null)
+            {
+                var s = new System.IO.DirectoryInfo(solution.Directory);
+                if (!s.Exists)
+                    s.Create();
+            }
 
             foreach (var file in solution.Files)
             {

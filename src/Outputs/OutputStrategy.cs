@@ -19,6 +19,14 @@ namespace Hy.Modeller.Outputs
             var creator = _creators.FirstOrDefault(c => c.SupportedType.IsAssignableFrom(output.GetType()));
             if (creator == null)
                 throw new InvalidOperationException($"No IFileCreator implementation registered for {output.GetType().Name}");
+
+            if (generatorConfiguration?.OutputPath != null)
+            {
+                var s = new System.IO.DirectoryInfo(generatorConfiguration.OutputPath);
+                if (!s.Exists)
+                    s.Create();
+            }
+
             creator.Create(output, generatorConfiguration);
         }
     }
