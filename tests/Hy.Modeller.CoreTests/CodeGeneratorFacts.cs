@@ -21,6 +21,8 @@ namespace Hy.Modeller.CoreTests
             model.Fields.Add(new Field("MyField") { MaxLength = 30 });
             module.Models.Add(model);
 
+            var wModule = Hy.Modeller.Base.WorkingModels.Module.Create(module);
+
             var metadata = new Mock<IMetadata>();
             metadata.SetupGet(c => c.EntryPoint).Returns(typeof(SimpleTestGenerator));
 
