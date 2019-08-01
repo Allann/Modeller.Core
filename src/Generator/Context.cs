@@ -51,7 +51,7 @@ namespace Hy.Modeller.Generator
                 {
                     var matches = generators.Where(g => g.Metadata.Name.ToLowerInvariant() == name || g.AbbreviatedFileName.ToLowerInvariant() == name);
                     var exact = matches.SingleOrDefault(m => m.Metadata.Version == Version);
-                    Generator = exact ?? matches.OrderByDescending(k => k.Metadata.Version).First();
+                    Generator = exact ?? matches.OrderByDescending(k => k.Metadata.Version).FirstOrDefault();
                 }
             }
 

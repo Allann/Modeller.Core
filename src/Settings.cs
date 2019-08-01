@@ -61,7 +61,7 @@ namespace Hy.Modeller
             }
         }
 
-        bool ISettings.PackagesInitialised() => Context.Packages.Any();
+        bool ISettings.PackagesInitialised() => Context.Packages!=null && Context.Packages.Any();
 
         public IGeneratorConfiguration Context { get; }
 

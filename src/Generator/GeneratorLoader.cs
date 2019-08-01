@@ -95,12 +95,12 @@ namespace Hy.Modeller.Generator
             }
         }
 
-        IEnumerable<GeneratorItem> IGeneratorLoader.Load(string filePath)
+        IEnumerable<IGeneratorItem> IGeneratorLoader.Load(string filePath)
         {
             return Process(filePath);
         }
 
-        bool IGeneratorLoader.TryLoad(string filePath, out IEnumerable<GeneratorItem> generators)
+        bool IGeneratorLoader.TryLoad(string filePath, out IEnumerable<IGeneratorItem> generators)
         {
             try
             {

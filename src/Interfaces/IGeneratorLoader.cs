@@ -4,7 +4,7 @@ namespace Hy.Modeller.Interfaces
 {
     public interface IGeneratorLoader
     {
-        IEnumerable<GeneratorItem> Load(string filePath);
-        bool TryLoad(string filePath, out IEnumerable<GeneratorItem> generators);
+        IEnumerable<IGeneratorItem> Load(string filePath);
+        bool TryLoad(string filePath, out IEnumerable<IGeneratorItem> generators);
     }
 }
