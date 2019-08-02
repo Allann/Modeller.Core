@@ -1,4 +1,5 @@
 ﻿using Hy.Modeller.Interfaces;
+using Hy.Modeller.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Hy.Modeller.Generator
                     _logger.LogError($"{item.ErrorMessage}");
                 return null;
             }
-        
+
             _logger.LogInformation($"Module: {context.Module.Namespace}");
             _logger.LogInformation($"Supports regen: {context.Settings.SupportRegen}");
             _logger.LogInformation($"Generator: {context.Generator.Metadata.Name}");
@@ -39,17 +40,16 @@ namespace Hy.Modeller.Generator
             var ci = cis[0];
             var args = new List<object>();
 
-            var module = Base.WorkingModels.Module.Create(context.Module);
-            Base.WorkingModels.Model model = null;
-            if(module!=null && context.Model!=null)
-                model = module.Models.FirstOrDefault(m=>m.Name==context.Model.Name);
+            Model model = null;
+            if (context.Module != null && context.Model != null)
+                model = context.Module.Models.FirstOrDefault(m => m.Name == context.Model.Name);
 
             foreach (var p in ci.GetParameters())
             {
                 if (p.ParameterType.FullName == "Hy.Modeller.Interfaces.ISettings")
                     args.Add(context.Settings);
                 else if (p.ParameterType.FullName == "Hy.Modeller.Models.Module")
-                    args.Add(module);
+                    args.Add(context.Module);
                 else if (p.ParameterType.FullName == "Hy.Modeller.Models.Model")
                     args.Add(model);
                 else

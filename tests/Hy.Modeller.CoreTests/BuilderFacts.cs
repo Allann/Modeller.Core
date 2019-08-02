@@ -7,66 +7,12 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Xunit;
 
 namespace Hy.Modeller.CoreTests
 {
-    public class XunitLogger<T> : ILogger<T>, IDisposable
-    {
-        private StringBuilder _output;
-
-        public XunitLogger(StringBuilder output)
-        {
-            _output = output;
-        }
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-            _output.AppendLine(state.ToString());
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return this;
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
-//    public class PresenterFacts
-//    {
-//        [Fact]
-//        public void Presentor_Display_CanListAllGenerators()
-//        {
-//            var list = new List<GeneratorItem>();
-
-//            var sb = new StringBuilder();
-//            var config = new Mock<IGeneratorConfiguration>();
-//            config.SetupGet(c => c.LocalFolder).Returns("D:\\Files\\Generators");
-//            config.SetupGet(c => c.Target).Returns("netstandard2.0");
-//            config.SetupGet(c => c.Verbose).Returns(true);
-//            var logger = new XunitLogger<IPresenter>(sb);
-//            var loader = new Mock<IGeneratorLoader>();
-//            loader.Setup(c => c.TryLoad("D:\\Files\\Generators\\netstandard2.0", out var list)).Returns(true);
-
-//            var presenter = new Presenter(config.Object, loader.Object, logger);
-//            presenter.Display();
-
-//            sb.ToString().Should().Be(@"Available generators
-//  location: D:\Files\Generators\netstandard2.0
-
-
-//");
-//        }
-//    }
-
     public class BuilderFacts
     {
         [Fact]
@@ -90,14 +36,74 @@ namespace Hy.Modeller.CoreTests
             outputStrategy.Verify(c => c.Create(It.IsAny<IOutput>(), It.IsAny<IGeneratorConfiguration>()), Times.Once);
         }
 
+        [Fact]
+        public void Serialize()
+        {
+            var module = Hy.Modeller.Fluent.Module
+                .Create("Member")
+                .CompanyName("FourMi")
+                .AddModel("Member")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("FirstName").MaxLength(50).Nullable(false).Build
+                    .AddField("LastName").MaxLength(50).Nullable(false).Build
+                    .AddField("Email").MaxLength(256).BusinessKey(true).Nullable(false).Build
+                    .AddField("Phone").MaxLength(15).Nullable(true).Build
+                    .Build
+                .AddModel("Level")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("Name").MaxLength(50).Nullable(false).Build
+                    .AddField("Type").MaxLength(20).Nullable(false).Build
+                    .AddField("BundleLimit").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("Description").MaxLength(1000).Build
+                    .AddField("Fee").DataType(DataTypes.Decimal).Scale(12).Precision(2).Nullable(false).Build
+                    .AddField("IsTaxed").DataType(DataTypes.Bool).Nullable(false).Build
+                    .AddField("IsPublic").DataType(DataTypes.Bool).Nullable(false).Build
+                    .AddField("IsUpgradable").DataType(DataTypes.Bool).Nullable(false).Build
+
+                    .Build
+                .AddModel("PaymentMethod")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("Name").MaxLength(50).Nullable(false).Build
+                    .Build
+                .AddModel("Policy")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .Build
+                .Build;
+
+            var level = module.Models.Single(m => m.Name.Value == "Level");
+            var member = module.Models.Single(m => m.Name.Value == "Member");
+            var paymentMethod = module.Models.Single(m => m.Name.Value == "PaymentMethod");
+            var policy = module.Models.Single(m => m.Name.Value == "Policy");
+            module.AddForeignKey(level, member);
+            module.AddForeignKey(paymentMethod, level);
+            module.AddForeignKey(policy, level);
+
+            Console.WriteLine( JsonExtensions.ToJson(module));
+
+            //output.Should().Be("{\"company\":\"FourMi\",\"project\":\"Member\",\"models\":[]}");
+        }
+
         //[Fact]
         //public void Builder_Real_Test()
         //{
-        //    var config = new GeneratorConfiguration();
-        //    config.GeneratorName = "MVCSolution";
-        //    config.LocalFolder = "F:\\Repos\\Modeller.Generators.git\\Generators";
-        //    config.OutputPath = "F:\\dev\\test\\modeller";
-        //    config.SourceModel = "F:\\dev\\modeller_model.json";
+        //    var config = new GeneratorConfiguration
+        //    {
+        //        GeneratorName = "DomainProject",
+        //        LocalFolder = "F:\\Repos\\Modeller.SampleGenerators\\src\\Generators",
+        //        Target="netstandard2.0",
+        //        OutputPath = "F:\\dev\\test\\members",
+        //        SourceModel = "F:\\dev\\members_model.json"
+        //    };
 
         //    var logger = new Mock<ILogger<IPackageService>>();
         //    var settingLoader = new JsonSettingsLoader();
@@ -112,7 +118,7 @@ namespace Hy.Modeller.CoreTests
         //    var loggerFW = new Mock<ILogger<FileWriter>>();
         //    var loggerB = new Mock<ILogger<IBuilder>>();
         //    var codeGenerator = new CodeGenerator(loggerCG.Object);
-            
+
         //    var fileWriter = new FileWriter(loggerFW.Object);
         //    var fc1 = new CreateFile(fileWriter);
         //    var fc2 = new CreateFileGroup(fileWriter);
@@ -125,23 +131,5 @@ namespace Hy.Modeller.CoreTests
         //    var builder = new Builder(context, codeGenerator, outputStrategy, loggerB.Object);
         //    builder.Create();
         //}
-    }
-
-    public class OutputStrategyFacts
-    {
-        [Fact]
-        public void OutputStrategy_Returns_Expected()
-        {
-            var mockFileWriter = new Mock<IFileWriter>();
-            var fileWriter = mockFileWriter.Object;
-            var strategies = new List<IFileCreator> { new CreateSnippet(fileWriter), new CreateProject(fileWriter) };
-            var config = new Mock<IGeneratorConfiguration>();
-            config.SetupGet(c => c.OutputPath).Returns(System.IO.Path.GetTempPath());
-            var snippet = new Snippet("MySnippet","My Content " + Guid.NewGuid().ToString("N")); 
-
-            var outputStrategy = new OutputStrategy(strategies);
-
-            outputStrategy.Create(snippet, config.Object);
-        }
     }
 }
