@@ -52,20 +52,46 @@ namespace Hy.Modeller.CoreTests
                     .AddField("Email").MaxLength(256).BusinessKey(true).Nullable(false).Build
                     .AddField("Phone").MaxLength(15).Nullable(true).Build
                     .Build
+                .AddModel("Membership")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("StartDate").DataType(DataTypes.DateTimeOffset).Nullable(true).Build
+                    .AddField("EndDate").DataType(DataTypes.DateTimeOffset).Nullable(true).Build
+                    .AddField("Status").DataTypeTypeName("MembershipStates").Nullable(false).Build
+                    .Build
+                .AddModel("MembershipApplication")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("ApprovalRequired").DataType(DataTypes.Bool).Nullable(false).Build
+                    .AddField("FullPayment").DataType(DataTypes.Bool).Nullable(false).Build
+                    .AddField("PaymentEmailTemplateId").DataType(DataTypes.Int32).Nullable(true).Build
+                    .AddField("ActivationEmailTemplateId").DataType(DataTypes.Int32).Nullable(true).Build
+                    .Build
+                .AddModel("Group")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("Name").MaxLength(50).Nullable(false).Build
+                    .AddField("Description").MaxLength(1000).Nullable(true).Build
+                    .Build
                 .AddModel("Level")
                     .WithKey()
                         .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
                         .Build
                     .AddField("TenantId").DataType(DataTypes.Int32).Nullable(false).Build
                     .AddField("Name").MaxLength(50).Nullable(false).Build
-                    .AddField("Type").MaxLength(20).Nullable(false).Build
+                    .AddField("Type").DataTypeTypeName("MembershipTypes").Nullable(false).Build
                     .AddField("BundleLimit").DataType(DataTypes.Int32).Nullable(false).Build
                     .AddField("Description").MaxLength(1000).Build
-                    .AddField("Fee").DataType(DataTypes.Decimal).Scale(12).Precision(2).Nullable(false).Build
+                    .AddField("Fee").DataTypeTypeName("Money").Nullable(false).Build
                     .AddField("IsTaxed").DataType(DataTypes.Bool).Nullable(false).Build
                     .AddField("IsPublic").DataType(DataTypes.Bool).Nullable(false).Build
                     .AddField("IsUpgradable").DataType(DataTypes.Bool).Nullable(false).Build
-
                     .Build
                 .AddModel("PaymentMethod")
                     .WithKey()
@@ -73,10 +99,20 @@ namespace Hy.Modeller.CoreTests
                         .Build
                     .AddField("Name").MaxLength(50).Nullable(false).Build
                     .Build
+                .AddModel("RenewalReminder")
+                    .WithKey()
+                        .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
+                        .Build
+                    .AddField("DaysBefore").DataType(DataTypes.Int32).Nullable(false).Build
+                    .AddField("GenerateInvoice").DataTypeTypeName("RenewalFlags").Nullable(false).Build
+                    .AddField("EmailTemplateId").DataType(DataTypes.Int32).Nullable(false).Build
+                    .Build
                 .AddModel("Policy")
                     .WithKey()
                         .AddField("Id").DataType(DataTypes.Int32).Nullable(false).Build
                         .Build
+                    .AddField("Period").DataTypeTypeName("MembershipPeriods").Nullable(false).Build
+                    .AddField("Custom").DataType(DataTypes.Time).Nullable(true).Build
                     .Build
                 .Build;
 
