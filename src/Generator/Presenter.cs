@@ -49,17 +49,17 @@ namespace Hy.Modeller.Generator
 
             foreach (var generator in generators)
             {
-                var abbr = FileHelper.GetAbbreviatedFilename(generator.FilePath);
+                var (filename, version) = FileHelper.GetAbbreviatedFilename(generator.FilePath);
                 var m = generator.Metadata;
                 var vers = m.Version == null ? new GeneratorVersion().ToString() : m.Version.ToString();
                 if (GeneratorConfiguration.Verbose)
                 {
-                    rows.Add(new List<string> { abbr.filename, m.Name, vers, m.Description });
+                    rows.Add(new List<string> { filename, m.Name, vers, m.Description });
                     foreach (var item in generator.Metadata.SubGenerators)
                         rows.Add(new List<string> { "", item.Name });
                 }
                 else
-                    rows.Add(new List<string> { abbr.filename, m.Name, vers });
+                    rows.Add(new List<string> { filename, m.Name, vers });
             }
 
             if (rows.Any())

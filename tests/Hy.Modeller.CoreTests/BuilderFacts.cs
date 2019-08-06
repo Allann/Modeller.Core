@@ -1,14 +1,9 @@
-﻿using FluentAssertions;
-using Hy.Modeller.Core.Outputs;
-using Hy.Modeller.Generator;
-using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Interfaces;
 using Hy.Modeller.Outputs;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Hy.Modeller.CoreTests

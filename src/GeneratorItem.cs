@@ -21,8 +21,8 @@ namespace Hy.Modeller
                 throw new FileNotFoundException("Generator not found.", filePath);
             }
             FilePath = filePath;
-            var result = FileHelper.GetAbbreviatedFilename(filePath);
-            AbbreviatedFileName = result.filename;
+            var (filename, _) = FileHelper.GetAbbreviatedFilename(filePath);
+            AbbreviatedFileName = filename;
 
         }
 
