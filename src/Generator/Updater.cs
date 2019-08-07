@@ -27,9 +27,6 @@ namespace Hy.Modeller.Generator
             _logger.LogInformation($"Local Folder: {_generatorConfiguration.LocalFolder}");
             _logger.LogInformation($"Overwrite: {_generatorConfiguration.Overwrite}");
 
-            var server = Path.Combine(_generatorConfiguration.ServerFolder + "", _generatorConfiguration.Target);
-            var local = Path.Combine(_generatorConfiguration.LocalFolder + "", _generatorConfiguration.Target);
-
             if (UpdateLocalGenerators())
             {
                 _logger.LogInformation($"Update completed successfully. Files affected: {_affected}");

@@ -1,14 +1,4 @@
-﻿using FluentAssertions;
-using Hy.Modeller.CoreTests.TestGenenerators;
-using Hy.Modeller.Generator;
-using Hy.Modeller.Interfaces;
-using Hy.Modeller.Models;
-using Hy.Modeller.Outputs;
-using Microsoft.Extensions.Logging;
-using Moq;
-using Xunit;
-
-namespace Hy.Modeller.CoreTests
+﻿namespace Hy.Modeller.CoreTests
 {
     public class CodeGeneratorFacts
     {

@@ -18,9 +18,10 @@ namespace Hy.Modeller.CoreTests
         [InlineData(" ")]
         public void GeneratorConfiguration_Target_ReturnsExpectedValues(string value)
         {
-            var sut = new GeneratorConfiguration();
-
-            sut.Target = value;
+            var sut = new GeneratorConfiguration
+            {
+                Target = value
+            };
 
             sut.Target.Should().Be(Defaults.Target);
         }
@@ -31,9 +32,10 @@ namespace Hy.Modeller.CoreTests
         [InlineData(" ")]
         public void GeneratorConfiguration_LocalFolder_ReturnsExpectedValues(string value)
         {
-            var sut = new GeneratorConfiguration();
-
-            sut.LocalFolder = value;
+            var sut = new GeneratorConfiguration
+            {
+                LocalFolder = value
+            };
 
             sut.LocalFolder.Should().Be(Defaults.LocalFolder);
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using Hy.Modeller.Interfaces;
 
 namespace Hy.Modeller.Interfaces
 {
