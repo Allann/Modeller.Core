@@ -36,11 +36,11 @@ namespace Hy.Modeller.Generator
 
             foreach (var p in ci.GetParameters())
             {
-                if (p.ParameterType.FullName == "CodeGen.Interfaces.ISettings" && context.Settings != null)
+                if (p.ParameterType.FullName == nameof(ISettings) && context.Settings != null)
                     args.Add(context.Settings);
-                else if (p.ParameterType.FullName == "CodeGen.Domain.Module" && context.Module != null)
+                else if (p.ParameterType.FullName == nameof(Domain.Module) && context.Module != null)
                     args.Add(context.Module);
-                else if (p.ParameterType.FullName == "CodeGen.Domain.Model" && context.Model != null)
+                else if (p.ParameterType.FullName == nameof(Domain.Model) && context.Model != null)
                     args.Add(context.Model);
                 else
                 {
