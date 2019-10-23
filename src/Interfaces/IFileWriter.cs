@@ -4,4 +4,5 @@
     {
         void Write(IFile file);
     }
+
 }

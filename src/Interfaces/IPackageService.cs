@@ -4,8 +4,8 @@ namespace Hy.Modeller.Interfaces
 {
     public interface IPackageService
     {
-        IEnumerable<Package> Items { get; }
+        IEnumerable<IPackage> Items { get; }
 
-        void Refresh(IContext context);
+        void Refresh(string targetFile);
     }
 }

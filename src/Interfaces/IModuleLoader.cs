@@ -1,10 +1,8 @@
-﻿using Hy.Modeller.Models;
-
-namespace Hy.Modeller.Interfaces
+﻿namespace Hy.Modeller.Interfaces
 {
-    public interface IModuleLoader
+    public interface IModuleLoader<T>
     {
-        Module Load(string filePath);
-        bool TryLoad(string filePath, out Module module);
+        T Load(string filePath);
+        bool TryLoad(string filePath, out T module);
     }
 }

@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Allan Nielsen</Authors>
     <Company>Hybrid Solutions</Company>
-    <Copyright>Copyright © 2018</Copyright>
+    <Copyright>Copyright © 2019</Copyright>
     <RepositoryUrl></RepositoryUrl>
     <RepositoryType></RepositoryType>
     <PackageTags>Code Generator, C#</PackageTags>
@@ -14,23 +14,27 @@
     <AssemblyOriginatorKeyFile>modeller.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
-    <RootNamespace>Hy.Modeller.Core</RootNamespace>
+    <RootNamespace>Hy.Modeller</RootNamespace>
     <Version>1.0.1</Version>
     <Description>Provides the logic to produce generated outputs using the Modeller.Base components.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="netstandard2.0.json" />
+    <PackageReference Include="FluentValidation" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Humanizer.Core" Version="2.6.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="McMaster.NETCore.Plugins" Version="0.2.4" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Humanizer.Core" Version="2.6.2" />
-    <PackageReference Include="Hy.Modeller.Base" Version="3.0.29" />
-    <PackageReference Include="McMaster.NETCore.Plugins" Version="0.2.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="System.Runtime" Version="4.3.1" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <Folder Include="Generator\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>

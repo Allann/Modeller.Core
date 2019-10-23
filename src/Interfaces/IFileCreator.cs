@@ -6,6 +6,7 @@ namespace Hy.Modeller.Interfaces
     {
         Type SupportedType { get; }
 
-        void Create(IOutput output, IGeneratorConfiguration generatorConfiguration);
+        void Create(IOutput output, string path = null, bool overwrite = false);
     }
+
 }

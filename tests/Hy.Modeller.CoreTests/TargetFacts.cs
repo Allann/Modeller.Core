@@ -1,8 +1,9 @@
-﻿using FluentAssertions;
+﻿using Hy.Modeller.Generator;
+using FluentAssertions;
 using System.Linq;
 using Xunit;
 
-namespace Hy.Modeller.CoreTests
+namespace Hy.Modeller.Tests
 {
     public class TargetFacts
     {
@@ -17,7 +18,7 @@ namespace Hy.Modeller.CoreTests
         public void Targets_Supported_ReturnsExpectedCount()
         {
             var sut = new Targets();
-            sut.Supported.Should().HaveCount(1);
+            sut.Supported.Should().HaveCount(2);
         }
 
         [Fact]
@@ -37,11 +38,11 @@ namespace Hy.Modeller.CoreTests
         {
             var sut = new Targets();
             sut.RegisterTarget("new");
-            sut.Supported.Should().HaveCount(2);
+            sut.Supported.Should().HaveCount(3);
 
             sut.Reset();
 
-            sut.Supported.Should().HaveCount(1);
+            sut.Supported.Should().HaveCount(2);
         }
     }
 }

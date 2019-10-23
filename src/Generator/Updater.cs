@@ -1,7 +1,6 @@
 ﻿using Hy.Modeller.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
-using System.IO;
 
 namespace Hy.Modeller.Generator
 {
@@ -19,7 +18,7 @@ namespace Hy.Modeller.Generator
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        void IUpdater.Refresh() 
+        void IUpdater.Refresh()
         {
             _affected = 0;
             _logger.LogInformation($"Updating generator files for target: {_generatorConfiguration.Target}");
@@ -39,8 +38,8 @@ namespace Hy.Modeller.Generator
 
         private bool UpdateLocalGenerators()
         {
-            var server = new DirectoryInfo(_generatorConfiguration.ServerFolder);
-            var local = new DirectoryInfo(_generatorConfiguration.LocalFolder);
+            var server = new System.IO.DirectoryInfo(_generatorConfiguration.ServerFolder);
+            var local = new System.IO.DirectoryInfo(_generatorConfiguration.LocalFolder);
 
             if (!server.Exists)
             {
@@ -52,7 +51,7 @@ namespace Hy.Modeller.Generator
             return true;
         }
 
-        private void DirectoryCopy(DirectoryInfo sourceDirName, DirectoryInfo destDirName)
+        private void DirectoryCopy(System.IO.DirectoryInfo sourceDirName, System.IO.DirectoryInfo destDirName)
         {
             if (!sourceDirName.Exists)
             {
@@ -72,8 +71,8 @@ namespace Hy.Modeller.Generator
             var files = sourceDirName.GetFiles();
             foreach (var file in files)
             {
-                var temppath = Path.Combine(destDirName.FullName, file.Name);
-                if (File.Exists(temppath) && !_generatorConfiguration.Overwrite)
+                var temppath = System.IO.Path.Combine(destDirName.FullName, file.Name);
+                if (System.IO.File.Exists(temppath) && !_generatorConfiguration.Overwrite)
                 {
                     if (_generatorConfiguration.Verbose)
                         _logger.LogInformation($"skipping {file.Name}");
@@ -89,7 +88,7 @@ namespace Hy.Modeller.Generator
             // copy Sub-directories and their contents to new location.
             foreach (var subdir in dirs)
             {
-                var temppath = new DirectoryInfo(Path.Combine(destDirName.FullName, subdir.Name));
+                var temppath = new System.IO.DirectoryInfo(System.IO.Path.Combine(destDirName.FullName, subdir.Name));
                 DirectoryCopy(subdir, temppath);
             }
         }

@@ -1,9 +1,7 @@
 ﻿using Hy.Modeller.Interfaces;
-using Hy.Modeller.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Hy.Modeller.Generator
 {
@@ -18,47 +16,39 @@ namespace Hy.Modeller.Generator
 
         public IOutput Create(IContext context)
         {
-            var result = context.ProcessConfiguration();
-            if (!result.IsValid)
-            {
-                foreach (var item in result.Errors)
-                    _logger.LogError($"{item.ErrorMessage}");
-                return null;
-            }
+            if (!context.IsValid())
+                return new EmptyOutput();
 
-            _logger.LogInformation($"Module: {context.Module.Namespace}");
-            _logger.LogInformation($"Supports regen: {context.Settings.SupportRegen}");
-            _logger.LogInformation($"Generator: {context.Generator.Metadata.Name}");
+            _logger.LogInformation(context.ToString());
 
-            var type = context.Generator.Metadata.EntryPoint;
+            var type = context.Generator?.Metadata.EntryPoint;
+            if (type == null)
+                return new EmptyOutput();
+
             var cis = type.GetConstructors();
             if (cis.Length != 1)
             {
                 _logger.LogError("Modeller only supports single public constructors for a generator.");
-                return null;
+                return new EmptyOutput();
             }
             var ci = cis[0];
             var args = new List<object>();
 
-            Model model = null;
-            if (context.Module != null && context.Model != null)
-                model = context.Module.Models.FirstOrDefault(m => m.Name == context.Model.Name);
-
             foreach (var p in ci.GetParameters())
             {
-                if (p.ParameterType.FullName == "Hy.Modeller.Interfaces.ISettings")
+                if (p.ParameterType.FullName == "CodeGen.Interfaces.ISettings" && context.Settings != null)
                     args.Add(context.Settings);
-                else if (p.ParameterType.FullName == "Hy.Modeller.Models.Module")
+                else if (p.ParameterType.FullName == "CodeGen.Domain.Module" && context.Module != null)
                     args.Add(context.Module);
-                else if (p.ParameterType.FullName == "Hy.Modeller.Models.Model")
-                    args.Add(model);
+                else if (p.ParameterType.FullName == "CodeGen.Domain.Model" && context.Model != null)
+                    args.Add(context.Model);
                 else
                 {
                     _logger.LogError($"{p.ParameterType.ToString()} is not a supported argument type on Generator constructors.");
-                    return null;
+                    return new EmptyOutput();
                 }
             }
-            return (ci.Invoke(args.ToArray()) as IGenerator).Create();
+            return ((IGenerator)ci.Invoke(args.ToArray())).Create();
         }
     }
 }

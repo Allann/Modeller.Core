@@ -1,36 +1,27 @@
-﻿using FluentAssertions;
-using Hy.Modeller.Outputs;
-using System.Text;
+﻿using Hy.Modeller.Domain.Extensions;
 using Xunit;
+using FluentAssertions;
+using Moq;
+using System;
+using System.Text;
 
-namespace Hy.Modeller.CoreTests
+namespace Hy.Modeller.DomainTests
 {
     public class StringBuilderExtensionFacts
     {
-        [Fact]
-        public void StringBuild_Indent_DefaultsTo4Spaces()
-        {
-            var sut = new StringBuilder();
-
-            sut.Indent(1);
-            
-            sut.ToString().Should().Be("    ");
-        }
-
         [Theory]
-        [InlineData(-4, "    ")]
-        [InlineData(0, "    ")]
-        [InlineData(3, "   ")]
-        [InlineData(5, "     ")]
-        [InlineData(8, "        ")]
-        [InlineData(9, "    ")]
-        public void StringBuild_Indent_DefaultsTo6Spaces(int spaces, string expected)
+        [InlineData("Id", "ValueId", "Value")]
+        [InlineData("Id", "Value Id", "Value ")]
+        [InlineData("Id", "ValueIds", "ValueIds")]
+        [InlineData(null, "ValueIds", "ValueIds")]
+        [InlineData("x", null, "")]
+        public void StringBuilderExtension_TrimEnd_RemovesValuesCorrectly(string trim, string value, string expected)
         {
-            var sut = new StringBuilder();
+            var sb = new StringBuilder(value);
 
-            sut.Indent(1, spaces);
+            sb.TrimEnd(trim);
 
-            sut.ToString().Should().Be(expected);
+            sb.ToString().Should().Be(expected);
         }
     }
 }

@@ -1,14 +1,16 @@
-﻿using FluentAssertions;
-using Hy.Modeller.CoreTests.TestGenenerators;
+﻿using Hy.Modeller.Generator;
 using Hy.Modeller.Interfaces;
+using Hy.Modeller.Tests.TestFiles;
+using FluentAssertions;
 using Moq;
 using System;
 using System.IO;
 using System.Reflection;
 using Xunit;
 
-namespace Hy.Modeller.CoreTests
+namespace Hy.Modeller.Tests
 {
+
     public class GeneratorItemFacts
     {
         private string GetThisFilePath()
@@ -23,7 +25,7 @@ namespace Hy.Modeller.CoreTests
 
             var meta = new Mock<IMetadata>();
             var settings = new Mock<ISettings>();
-            var module = new Models.Module();
+            var module = new Domain.Module("Company", "Test");
 
             var sut = new GeneratorItem(meta.Object, thisTestFilePath, typeof(SimpleTestGenerator));
 

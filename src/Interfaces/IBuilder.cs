@@ -2,8 +2,6 @@
 {
     public interface IBuilder
     {
-        IContext Context { get; }
-
-        void Create();
+        void Create(IGeneratorConfiguration configuration);
     }
 }

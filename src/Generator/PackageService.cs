@@ -1,54 +1,46 @@
-﻿using Hy.Modeller.Interfaces;
-using Microsoft.Extensions.Logging;
-using Modeller;
+﻿using Microsoft.Extensions.Logging;
+using Hy.Modeller.Generator.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Hy.Modeller.Interfaces;
 
 namespace Hy.Modeller.Generator
 {
     public class PackageService : IPackageService
     {
-        private readonly IPackageFileLoader _loader;
+        private readonly ILoader<IEnumerable<IPackage>> _loader;
         private readonly ILogger<IPackageService> _logger;
-        private readonly List<Package> _items = new List<Package>();
+        private readonly List<IPackage> _items = new List<IPackage>();
 
-        public PackageService(IPackageFileLoader loader, ILogger<IPackageService> logger)
+        public PackageService(ILoader<IEnumerable<IPackage>> loader, ILogger<IPackageService> logger)
         {
-            _loader = loader ?? throw new ArgumentNullException(nameof(loader));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _loader = loader;
+            _logger = logger;
         }
 
-        private string Target { get; set; }
-        private string TargetFile { get; set; }
-
-        public void Refresh(IContext context)
+        public void Refresh(string targetFile)
         {
-            _items.Clear();
-            Target = context?.GeneratorConfiguration?.Target;
-            if (Target == null)
-                return;
-            var d = new DirectoryInfo(context.TargetFolder);
+            _logger.LogInformation($"Using Package file: {targetFile}");
+
+            var d = new FileInfo(targetFile);
             if (!d.Exists) return;
-
-            TargetFile = Path.Combine(d.FullName, Target + ".json");
-            _logger.LogInformation($"Using Package file: {TargetFile}");
-
-            if (_loader.TryLoad(TargetFile, out var packages))
+            
+            _items.Clear();
+            if (_loader.TryLoad(targetFile, out var packages))
             {
                 _items.AddRange(packages);
+                _logger.LogInformation($"Loaded {packages.Count()} packages");
             }
         }
 
-        public IEnumerable<Package> Items
+        IEnumerable<IPackage> IPackageService.Items
         {
             get
             {
-                if (!_items.Any())
-                    throw new MissingTargetException(Target, $"Missing target file {TargetFile}");
-                return new ReadOnlyCollection<Package>(_items);
+                return new ReadOnlyCollection<IPackage>(_items);
             }
         }
     }

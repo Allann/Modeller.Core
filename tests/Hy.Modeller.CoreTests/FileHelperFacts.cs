@@ -1,13 +1,12 @@
-﻿using FluentAssertions;
-using Hy.Modeller.Base.Models;
+﻿using Hy.Modeller.Generator;
+using FluentAssertions;
 using Xunit;
 
-namespace Hy.Modeller.CoreTests
+namespace Hy.Modeller.Tests
 {
     public class FileHelperFacts
     {
         [Theory]
-        [InlineData("Hy.Helper.Tester.dll", "Hy.Helper.Tester", null)]
         [InlineData("Hy.Helper.Tester.2.0.dll", "Hy.Helper.Tester", "2.0")]
         [InlineData("Api.v2.0.dll", "Api", "2.0")]
         [InlineData("Api.v2.0.deps.json", "Api.deps", "2.0")]

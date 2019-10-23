@@ -1,76 +1,145 @@
 ﻿using FluentValidation.Results;
-using Hy.Modeller.Base.Models;
-using Hy.Modeller.Core.Validators;
-using Hy.Modeller.Interfaces;
-using Hy.Modeller.Models;
+using Hy.Modeller.Generator.Validators;
 using System;
 using System.Linq;
+using Hy.Modeller.Interfaces;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Hy.Modeller.Generator
 {
     public class Context : IContext
     {
-        private readonly ISettingsLoader _settingsLoader;
-        private readonly IModuleLoader _moduleLoader;
-        private readonly IGeneratorLoader _generatorLoader;
+        private readonly ILoader<ISettings> _settingsLoader;
+        private readonly ILoader<IEnumerable<INamedElement>> _moduleLoader;
+        private readonly ILoader<IEnumerable<IGeneratorItem>> _generatorLoader;
         private readonly IPackageService _packageService;
+        private readonly ILogger<IContext> _logger;
+        private ISettings _settings;
+        private IGeneratorItem _generator;
 
-        public Context(IGeneratorConfiguration generatorConfiguration, 
-            ISettingsLoader settingsLoader, 
-            IModuleLoader moduleLoader, 
-            IGeneratorLoader generatorLoader,
-            IPackageService packageService)
+        private INamedElement _model;
+        private INamedElement _module;
+        private ValidationResult _result;
+
+        public Context(ILoader<ISettings> settingsLoader, ILoader<IEnumerable<INamedElement>> moduleLoader, ILoader<IEnumerable<IGeneratorItem>> generatorLoader, IPackageService packageService, ILogger<IContext> logger)
         {
-            GeneratorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
-            _settingsLoader = settingsLoader ?? throw new ArgumentNullException(nameof(settingsLoader));
-            _moduleLoader = moduleLoader ?? throw new ArgumentNullException(nameof(moduleLoader));
-            _generatorLoader = generatorLoader ?? throw new ArgumentNullException(nameof(generatorLoader));
-            _packageService = packageService ?? throw new ArgumentNullException(nameof(packageService));
+            _settingsLoader = settingsLoader;
+            _moduleLoader = moduleLoader;
+            _generatorLoader = generatorLoader;
+            _packageService = packageService;
+            _logger = logger;
         }
 
-        public IGeneratorItem Generator { get; private set; }
-
-        public Module Module { get; private set; }
-
-        public ISettings Settings { get; private set; }
-
-        public GeneratorVersion Version { get; private set; } = new GeneratorVersion();
-
-        public Model Model { get; private set; }
-
-        public string TargetFolder => !string.IsNullOrWhiteSpace(GeneratorConfiguration.LocalFolder) && !string.IsNullOrWhiteSpace(GeneratorConfiguration.Target) ? System.IO.Path.Combine(GeneratorConfiguration.LocalFolder, GeneratorConfiguration.Target) : null;
-
-        public IGeneratorConfiguration GeneratorConfiguration { get; }
-
-        public ValidationResult ProcessConfiguration()
+        IGeneratorItem IContext.Generator
         {
-            var name = GeneratorConfiguration.GeneratorName?.ToLowerInvariant();
-            if (!string.IsNullOrEmpty(name))
+            get
             {
-                if (_generatorLoader.TryLoad(GeneratorConfiguration.LocalFolder, out var generators))
-                {
-                    var matches = generators.Where(g => g.Metadata.Name.ToLowerInvariant() == name || g.AbbreviatedFileName.ToLowerInvariant() == name);
-                    var exact = matches.SingleOrDefault(m => m.Metadata.Version == Version);
-                    Generator = exact ?? matches.OrderByDescending(k => k.Metadata.Version).FirstOrDefault();
-                }
+                if (_result == null)
+                    throw new InvalidOperationException("Call ValidateConfiguration before returning the generator");
+                return _generator;
+            }
+        }
+
+        ISettings IContext.Settings
+        {
+            get
+            {
+                if (_result == null)
+                    throw new InvalidOperationException("Call ValidateConfiguration before returning the settings");
+                return _settings;
+            }
+        }
+
+        INamedElement IContext.Module
+        {
+            get
+            {
+                if (_result == null)
+                    throw new InvalidOperationException("Call ValidateConfiguration before returning the module");
+                return _module;
+            }
+        }
+
+        INamedElement IContext.Model
+        {
+            get
+            {
+                if (_result == null)
+                    throw new InvalidOperationException("Call ValidateConfiguration before returning the model");
+                return _model;
+            }
+        }
+
+        private ISettings GetSettings(IGeneratorConfiguration config)
+        {
+            if (!_settingsLoader.TryLoad(config.SettingsFile, out var settings))
+                settings = new Settings(config);
+
+            if (!settings.PackagesInitialised())
+            {
+                _packageService.Refresh(System.IO.Path.Combine(settings.LocalFolder, settings.Target, settings.Target + ".json"));
+                settings.RegisterPackages(_packageService.Items);
+                _logger.LogInformation($"Registered {settings.Packages.Count()} packages");
+            }
+            return settings;
+        }
+
+        private IGeneratorItem GetGenerator(string localFolder, string name, string version)
+        {
+            if (!string.IsNullOrWhiteSpace(name) && _generatorLoader.TryLoad(localFolder, out var generators))
+            {
+                IGeneratorVersion v = new GeneratorVersion(version);
+                name = name.ToLowerInvariant();
+                var matches = generators.Where(g => g.Metadata.Name.ToLowerInvariant() == name || g.AbbreviatedFileName.ToLowerInvariant() == name);
+                var exact = matches.SingleOrDefault(m => m.Metadata.Version == v);
+                return exact ?? matches.OrderByDescending(k => k.Metadata.Version).FirstOrDefault();
+            }
+            return null;
+        }
+
+        public override string ToString()
+        {
+            var sb = new System.Text.StringBuilder();
+            if (_settings != null)
+                sb.AppendLine(_settings.ToString());
+
+            return sb.ToString();
+        }
+
+        bool IContext.IsValid() => _result == null ? false : _result.IsValid;
+
+        public ValidationResult ValidateConfiguration(IGeneratorConfiguration config)
+        {
+            _result = new ValidationResult();
+            _settings = GetSettings(config);
+            _generator = GetGenerator(_settings.LocalFolder, _settings.GeneratorName, _settings.Version);
+
+            if (!string.IsNullOrEmpty(_settings.SourceModel))
+            {
+                var items = _moduleLoader.Load(_settings.SourceModel);
+                if (!items.Any())
+                    _result.Errors.Add(new ValidationFailure("SourceModel", "No module found in the source model."));
+                else if (items.Count() == 1)
+                    _module = items.First();
+                else
+                    _result.Errors.Add(new ValidationFailure("SourceModel", "More than one module was found."));
             }
 
-            if (!string.IsNullOrEmpty(GeneratorConfiguration.SettingsFile))
-                Settings = _settingsLoader.Load<ISettings>(GeneratorConfiguration.SettingsFile);
-            if (Settings==null)
-                Settings = new Settings(GeneratorConfiguration);
-
-            if (Settings != null && !Settings.PackagesInitialised())
-            {
-                _packageService.Refresh(this);
-                Settings.RegisterPackages(_packageService.Items);
-            }
-
-            if (!string.IsNullOrEmpty(GeneratorConfiguration.SourceModel))
-                Module = _moduleLoader.Load(GeneratorConfiguration.SourceModel);
+            if (_module != null && string.IsNullOrEmpty(_settings.ModelName))
+                _model = ((Domain.Module)_module).Models.FirstOrDefault(m => m.Name.Value == config.ModelName);
 
             var configValidator = new ContextValidator();
-            return configValidator.Validate(this);
+            var result = configValidator.Validate(this);
+            if (result.IsValid)
+            {
+                foreach (var item in result.Errors)
+                {
+                    _logger.LogError(item.ErrorMessage);
+                    _result.Errors.Add(item);
+                }
+            }
+            return _result;
         }
     }
 }

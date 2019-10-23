@@ -1,5 +1,4 @@
-﻿using Hy.Modeller.Base.Models;
-using Hy.Modeller.Interfaces;
+﻿using Hy.Modeller.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -10,10 +9,10 @@ namespace Hy.Modeller.Generator
 {
     public class Presenter : IPresenter
     {
-        private readonly IGeneratorLoader _generatorLoader;
+        private readonly ILoader<IEnumerable<IGeneratorItem>> _generatorLoader;
         private readonly ILogger<IPresenter> _logger;
 
-        public Presenter(IGeneratorConfiguration generatorConfiguration, IGeneratorLoader generatorLoader, ILogger<IPresenter> logger)
+        public Presenter(IGeneratorConfiguration generatorConfiguration, ILoader<IEnumerable<IGeneratorItem>> generatorLoader, ILogger<IPresenter> logger)
         {
             GeneratorConfiguration = generatorConfiguration ?? throw new ArgumentNullException(nameof(generatorConfiguration));
             _generatorLoader = generatorLoader ?? throw new ArgumentNullException(nameof(generatorLoader));
@@ -54,7 +53,10 @@ namespace Hy.Modeller.Generator
                 var vers = m.Version == null ? new GeneratorVersion().ToString() : m.Version.ToString();
                 if (GeneratorConfiguration.Verbose)
                 {
-                    rows.Add(new List<string> { filename, m.Name, vers, m.Description });
+                    var row = new List<string> { filename, m.Name, vers };
+                    if (!string.IsNullOrWhiteSpace(m.Description))
+                        row.Add(m.Description);
+                    rows.Add(row);
                     foreach (var item in generator.Metadata.SubGenerators)
                         rows.Add(new List<string> { "", item.Name });
                 }
