@@ -20,10 +20,12 @@ namespace Hy.Modeller.Generator
 
         void IUpdater.Refresh()
         {
+            var folder = System.IO.Path.Combine(_generatorConfiguration.LocalFolder, _generatorConfiguration.Target);
+
             _affected = 0;
             _logger.LogInformation($"Updating generator files for target: {_generatorConfiguration.Target}");
             _logger.LogInformation($"Server Folder: {_generatorConfiguration.ServerFolder}");
-            _logger.LogInformation($"Local Folder: {_generatorConfiguration.LocalFolder}");
+            _logger.LogInformation($"Local Folder: {folder}");
             _logger.LogInformation($"Overwrite: {_generatorConfiguration.Overwrite}");
 
             if (UpdateLocalGenerators())
@@ -39,7 +41,8 @@ namespace Hy.Modeller.Generator
         private bool UpdateLocalGenerators()
         {
             var server = new System.IO.DirectoryInfo(_generatorConfiguration.ServerFolder);
-            var local = new System.IO.DirectoryInfo(_generatorConfiguration.LocalFolder);
+            var folder = System.IO.Path.Combine(_generatorConfiguration.LocalFolder, _generatorConfiguration.Target);
+            var local = new System.IO.DirectoryInfo(folder);
 
             if (!server.Exists)
             {
