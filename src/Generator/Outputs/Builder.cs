@@ -32,9 +32,18 @@ namespace Hy.Modeller.Generator.Outputs
 
             var output = _codeGenerator.Create(_context);
             if (output != null && _context.Settings != null)
-                _outputStrategy.Create(output, _context.Settings.OutputPath, _context.Settings.SupportRegen == true);
+            {
+                try
+                {
+                    _outputStrategy.Create(output, _context.Settings.OutputPath, _context.Settings.SupportRegen == true);
+                    _logger.LogInformation($"Generation complete: {DateTime.Now.ToShortTimeString()}");
 
-            _logger.LogInformation($"Generation complete: {DateTime.Now.ToShortTimeString()}");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogError(ex, $"Generation skipped for Module '{_context.Module.Name}' as there was no defined output strategy.");
+                }
+            }
         }
     }
 }
