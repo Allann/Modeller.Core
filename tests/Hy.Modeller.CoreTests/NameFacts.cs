@@ -8,6 +8,22 @@ namespace Hy.Modeller.DomainTests
 {
     public static class NameFacts
     {
+        [Fact]
+        public static void Name_Override_FromSerialization()
+        {
+            var json = "\"MasterDatum[MasterData]\""; // name.ToJson();
+            var name = json.FromJson<Name>();
+
+            name.Value.Should().Be("MasterData");
+            name.Singular.LocalVariable.Should().Be("masterDatum");
+            name.Singular.ModuleVariable.Should().Be("_masterDatum");
+            name.Singular.StaticVariable.Should().Be("MasterDatum");
+            name.Singular.Display.Should().Be("Master Datum");
+
+            name.IsOverridden().Should().BeTrue();
+        }
+
+
         [Theory]
         [InlineData("Tests", null, "\"Test\"", "Test")]
         [InlineData("Test[s]", null, "\"Test\"", "Test")]
@@ -67,6 +83,7 @@ namespace Hy.Modeller.DomainTests
         public static void Name_Values_SetWhenCreated()
         {
             var name = new Name("Freight_Rate");
+            name.SetOverride("Rates");
 
             name.Singular.Display.Should().Be("Freight Rate");
             name.Singular.LocalVariable.Should().Be("freightRate");
@@ -79,6 +96,24 @@ namespace Hy.Modeller.DomainTests
             name.Plural.ModuleVariable.Should().Be("_freightRates");
             name.Plural.StaticVariable.Should().Be("FreightRates");
             name.Plural.Value.Should().Be("FreightRates");
+
+            name.Value.Should().Be("Rates");
+            name.ToJson().Should().Be("\"FreightRate[Rates]\"");
+            var name2 = name.ToJson().FromJson<Name>();
+
+            name2.Singular.Display.Should().Be("Freight Rate");
+            name2.Singular.LocalVariable.Should().Be("freightRate");
+            name2.Singular.ModuleVariable.Should().Be("_freightRate");
+            name2.Singular.StaticVariable.Should().Be("FreightRate");
+            name2.Singular.Value.Should().Be("FreightRate");
+
+            name2.Plural.Display.Should().Be("Freight Rates");
+            name2.Plural.LocalVariable.Should().Be("freightRates");
+            name2.Plural.ModuleVariable.Should().Be("_freightRates");
+            name2.Plural.StaticVariable.Should().Be("FreightRates");
+            name2.Plural.Value.Should().Be("FreightRates");
+
+            name2.Value.Should().Be("Rates");
         }
 
         [Fact]

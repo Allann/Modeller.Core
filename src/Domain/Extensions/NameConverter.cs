@@ -15,7 +15,7 @@ namespace Hy.Modeller.Domain.Extensions
                 if (match > -1)
                 {
                     var ovr = s.Substring(match + 1, s.Length - match - 2);
-                    s = s.Substring(0, match - 1);
+                    s = s.Substring(0, match);
                     var temp = new Name(s);
                     temp.SetOverride(ovr);
                     return temp;
