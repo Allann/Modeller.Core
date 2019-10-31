@@ -26,7 +26,6 @@ namespace Hy.Modeller.DomainTests
 
         [Theory]
         [InlineData("Tests", null, "\"Test\"", "Test")]
-        [InlineData("Test[s]", null, "\"Test\"", "Test")]
         [InlineData("Test", null, "\"Test\"", "Test")]
         [InlineData("Test", "Tests", "\"Test[Tests]\"", "Tests")]
         [InlineData("Test", "Testing", "\"Test[Testing]\"", "Testing")]

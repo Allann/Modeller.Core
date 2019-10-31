@@ -27,12 +27,26 @@ namespace Hy.Modeller.Domain
 
         public void SetName(string name)
         {
+            string ovr = null;
+
             var value = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
             if (value.Length == 0)
             {
                 Plural = new Names(string.Empty, string.Empty, string.Empty, string.Empty);
                 Singular = new Names(string.Empty, string.Empty, string.Empty, string.Empty);
                 return;
+            }
+            else
+            {
+                if (value.EndsWith("]", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var match = value.LastIndexOf("[", StringComparison.InvariantCultureIgnoreCase);
+                    if (match > -1)
+                    {
+                        ovr = value.Substring(match + 1, value.Length - match - 2);
+                        value = value.Substring(0, match);
+                    }
+                }
             }
 
             var t = value.Humanize().Transform(To.TitleCase);
@@ -44,6 +58,9 @@ namespace Hy.Modeller.Domain
 
             Plural = new Names(dp, dp.Camelize(), dp.Pascalize(), p);
             Singular = new Names(ds, ds.Camelize(), ds.Pascalize(), s);
+
+            if (ovr != null)
+                SetOverride(ovr);
         }
 
         public bool Equals(Name other) => other != null && Value == other.Value;

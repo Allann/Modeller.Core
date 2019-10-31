@@ -8,20 +8,20 @@ namespace Hy.Modeller.Domain.Extensions
     {
         public override Name ReadJson(JsonReader reader, Type objectType, Name existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
+            if (reader is null)
+                throw new ArgumentNullException(nameof(reader));
+
             var s = (string)reader.Value;
-            if (s.EndsWith("]"))
+
+            if (hasExistingValue && existingValue != null)
             {
-                var match = s.LastIndexOf("[");
-                if (match > -1)
-                {
-                    var ovr = s.Substring(match + 1, s.Length - match - 2);
-                    s = s.Substring(0, match);
-                    var temp = new Name(s);
-                    temp.SetOverride(ovr);
-                    return temp;
-                }
+                existingValue.SetName(s);
+                return existingValue;
             }
-            return new Name(s);
+            else
+            {
+                return new Name(s);
+            }
         }
 
         public override void WriteJson(JsonWriter writer, Name value, JsonSerializer serializer)

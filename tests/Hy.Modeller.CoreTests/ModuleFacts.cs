@@ -9,6 +9,15 @@ namespace Hy.Modeller.DomainTests
 {
     public class ModuleFacts
     {
+        [Fact]
+        public void Module_Namespace_returnsExpected()
+        {
+            var sut = new Module("Jbssa", "MasterDatum[MasterData]");
+
+            sut.Namespace.Should().Be("Jbssa.MasterData");
+        }
+
+
         [Theory]
         [InlineData("company", "projects", null, "Company.Project")]
         [InlineData("company", "projects", "feature", "Company.Project.Feature")]
