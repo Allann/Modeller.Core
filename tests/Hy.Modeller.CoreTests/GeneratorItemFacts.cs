@@ -40,7 +40,7 @@ namespace Hy.Modeller.Tests
             var meta = new Mock<IMetadata>();
             Action create = () => new GeneratorItem(meta.Object, filepath, typeof(SimpleTestGenerator));
 
-            create.Should().Throw<ArgumentException>().And.Message.Should().Be("File path must be provided\r\nParameter name: filePath");
+            create.Should().Throw<ArgumentException>().And.Message.Should().Be("File path must be provided (Parameter 'filePath')");
         }
 
         [Fact]
