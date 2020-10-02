@@ -27,7 +27,7 @@ namespace Hy.Modeller.Domain
 
         public void SetName(string name)
         {
-            string ovr = null;
+            string? ovr = null;
 
             var value = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
             if (value.Length == 0)
@@ -60,10 +60,12 @@ namespace Hy.Modeller.Domain
             Singular = new Names(ds, ds.Camelize(), ds.Pascalize(), s);
 
             if (ovr != null)
+            {
                 SetOverride(ovr);
+            }
         }
 
-        public bool Equals(Name other) => other != null && Value == other.Value;
+        public bool Equals(Name? other) => !(other is null) && Value == other.Value;
 
         [JsonIgnore]
         public Names Singular { get; private set; }
@@ -77,17 +79,14 @@ namespace Hy.Modeller.Domain
 
         public override int GetHashCode() => -568181920 + EqualityComparer<string>.Default.GetHashCode(Value);
 
-        public static bool operator ==(Name name1, Name name2) => name2 is null ? false : EqualityComparer<Name>.Default.Equals(name1, name2);
+        public static bool operator ==(Name name1, Name name2) => !(name2 is null) && EqualityComparer<Name>.Default.Equals(name1, name2);
 
         public static bool operator !=(Name name1, Name name2) => !(name1 == name2);
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return obj is null
-                ? false
-                : ReferenceEquals(this, obj)
-                ? true : obj is Name other
-                ? other.Value == Value : obj.ToString() == Value;
+            return !(obj is null) && (ReferenceEquals(this, obj) || (obj is Name other
+                                                                             ? other.Value == Value : obj.ToString() == Value));
         }
     }
 }
