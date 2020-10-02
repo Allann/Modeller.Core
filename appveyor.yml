@@ -26,7 +26,7 @@ artifacts:
 notifications:
 - provider: Email
   to:
-  - allan.nielsen@jbssa.com.au
+  - allan.nielsen@emydex.com
   - imathome@zoho.com
   subject: Modeller.Core build
   on_build_success: true

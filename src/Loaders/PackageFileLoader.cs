@@ -10,7 +10,9 @@ namespace Hy.Modeller.Loaders
         public IEnumerable<IPackage> Load(string filePath)
         {
             if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException($"Package file '{filePath}' does not exist.");
+            }
 
             string packages;
             using (var reader = File.OpenText(filePath))
@@ -18,7 +20,7 @@ namespace Hy.Modeller.Loaders
                 packages = reader.ReadToEnd();
             }
             var data = packages.FromJson<IEnumerable<Domain.Package>>();
-            return data as IEnumerable<IPackage>;
+            return data;
         }
 
         public bool TryLoad(string filePath, out IEnumerable<IPackage> packages)
